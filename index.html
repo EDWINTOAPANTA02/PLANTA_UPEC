@@ -615,6 +615,7 @@
                       <th>Unidad</th>
                       <th>Vencimiento</th>
                       <th>Estado / Alerta</th>
+                      <th>Detalles / Observaciones</th>
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-slate-200">
@@ -837,9 +838,10 @@
         </button>
       </div>
 
-      <form onsubmit="handleCreateInventoryItem(event)" class="p-5 space-y-4">
+      <form onsubmit="handleCreateInventoryItem(event)" id="newItemForm" class="p-5 space-y-4">
         
-        <div class="grid grid-cols-2 gap-4">
+        <!-- Fila 1: Planta y Categoría (2 col) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="apex-label" for="newItemPlanta">Planta Piloto *</label>
             <select id="newItemPlanta" required class="apex-input plant-select-global">
@@ -848,7 +850,7 @@
           </div>
           <div>
             <label class="apex-label" for="newItemCategoria">Categoría *</label>
-            <select id="newItemCategoria" required class="apex-input">
+            <select id="newItemCategoria" required class="apex-input" onchange="handleCategoryChange()">
               <option value="Insumo">Insumo</option>
               <option value="Material">Material</option>
               <option value="Equipo">Equipo</option>
@@ -856,25 +858,76 @@
           </div>
         </div>
 
-        <div>
-          <label class="apex-label" for="newItemNombre">Nombre del Recurso *</label>
-          <input type="text" id="newItemNombre" required placeholder="Ej: Nitrato de Calcio USP" class="apex-input">
-        </div>
-
-        <div class="grid grid-cols-3 gap-3">
+        <!-- Fila 2: Nombre y Stock (2 col) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="apex-label" for="newItemStock">Stock Inicial *</label>
+            <label class="apex-label" for="newItemNombre">Nombre del Recurso *</label>
+            <input type="text" id="newItemNombre" required placeholder="Ej: Nitrato de Calcio USP" class="apex-input">
+          </div>
+          <div>
+            <label class="apex-label" for="newItemStock">Cantidad / Stock Inicial *</label>
             <input type="number" step="0.01" min="0" id="newItemStock" required placeholder="0.00" class="apex-input font-mono">
           </div>
+        </div>
+
+        <!-- SECCIÓN DINÁMICA: INSUMO -->
+        <div id="sectionInsumo" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="apex-label" for="newItemUnidad">Unidad *</label>
-            <input type="text" id="newItemUnidad" required placeholder="Kg / Litros / Uds" class="apex-input">
+            <label class="apex-label" for="newItemUnidad">Unidad de Medida *</label>
+            <select id="newItemUnidad" class="apex-input">
+              <option value="Kg">Kg</option>
+              <option value="g">g</option>
+              <option value="ml">ml</option>
+              <option value="L">L</option>
+              <option value="unid">unid</option>
+            </select>
           </div>
           <div>
-            <label class="apex-label" for="newItemVencimiento">Vencimiento</label>
+            <label class="apex-label" for="newItemVencimiento">Fecha de Vencimiento</label>
             <input type="date" id="newItemVencimiento" class="apex-input font-mono">
-            <span class="text-[10px] text-slate-400">Dejar vacío para S/F</span>
+            <span class="text-[10px] text-slate-400">Dejar vacío si no aplica (S/F)</span>
           </div>
+        </div>
+
+        <!-- SECCIÓN DINÁMICA: EQUIPO -->
+        <div id="sectionEquipo" class="grid grid-cols-1 sm:grid-cols-2 gap-4 hidden">
+          <div>
+            <label class="apex-label" for="newItemMarca">Marca *</label>
+            <input type="text" id="newItemMarca" placeholder="Ej: Clextral France" class="apex-input">
+          </div>
+          <div>
+            <label class="apex-label" for="newItemSerie">Número de Serie</label>
+            <input type="text" id="newItemSerie" placeholder="Ej: SN-99401" class="apex-input">
+          </div>
+          <div>
+            <label class="apex-label" for="newItemAnio">Año de Fabricación *</label>
+            <input type="number" id="newItemAnio" placeholder="Ej: 2022" min="1980" max="2030" class="apex-input font-mono">
+          </div>
+          <div>
+            <label class="apex-label" for="newItemEstadoEquipo">Estado Técnico *</label>
+            <select id="newItemEstadoEquipo" class="apex-input">
+              <option value="operativo">Operativo</option>
+              <option value="mantenimiento">En Mantenimiento</option>
+              <option value="inactivo">Inactivo por Daño</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- SECCIÓN DINÁMICA: MATERIAL -->
+        <div id="sectionMaterial" class="grid grid-cols-1 sm:grid-cols-2 gap-4 hidden">
+          <div>
+            <label class="apex-label" for="newItemEstadoMaterial">Estado del Material *</label>
+            <select id="newItemEstadoMaterial" class="apex-input">
+              <option value="Buen estado">Buen estado</option>
+              <option value="Mal estado">Mal estado</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Fila Común Final: Observación -->
+        <div>
+          <label class="apex-label" for="newItemObservacion">Observaciones / Detalles</label>
+          <textarea id="newItemObservacion" rows="2" placeholder="Detalles de proveedor, lote o ubicación..." class="apex-input"></textarea>
         </div>
 
         <div class="pt-3 border-t border-slate-200 flex items-center justify-end space-x-2">
@@ -1250,7 +1303,7 @@
       document.getElementById('irCountDisplay').innerText = `Mostrando ${filtered.length} de ${appState.inventory.length} items`;
 
       if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-6 text-slate-400">No se encontraron ítems con los filtros seleccionados.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center py-6 text-slate-400">No se encontraron ítems con los filtros seleccionados.</td></tr>';
         return;
       }
 
@@ -1287,6 +1340,7 @@
             <td class="text-slate-600">${item.unit}</td>
             <td class="font-mono text-xs ${isExpired ? 'text-red-700 font-bold' : 'text-slate-600'}">${item.expiry}</td>
             <td>${badgeHtml}</td>
+            <td class="text-xs text-slate-500 font-medium">${item.notes || '-'}</td>
           </tr>
         `;
       });
@@ -1306,19 +1360,116 @@
     }
 
     function openModalNewItem() {
+      document.getElementById('newItemForm').reset();
+      handleCategoryChange();
       document.getElementById('newItemModal').classList.remove('hidden');
     }
     function closeModalNewItem() {
       document.getElementById('newItemModal').classList.add('hidden');
     }
+
+    // Dynamic Actions - Visibility control based on Category
+    function handleCategoryChange() {
+      const category = document.getElementById('newItemCategoria').value;
+      
+      const secInsumo = document.getElementById('sectionInsumo');
+      const secEquipo = document.getElementById('sectionEquipo');
+      const secMaterial = document.getElementById('sectionMaterial');
+
+      // Hide all dynamic sections first
+      secInsumo.classList.add('hidden');
+      secEquipo.classList.add('hidden');
+      secMaterial.classList.add('hidden');
+
+      // Reset conditionally required attributes
+      document.getElementById('newItemUnidad').required = false;
+      document.getElementById('newItemMarca').required = false;
+      document.getElementById('newItemAnio').required = false;
+      document.getElementById('newItemEstadoEquipo').required = false;
+      document.getElementById('newItemEstadoMaterial').required = false;
+
+      // Clear hidden values
+      if (category !== 'Insumo') {
+        document.getElementById('newItemUnidad').value = 'Kg';
+        document.getElementById('newItemVencimiento').value = '';
+      }
+      if (category !== 'Equipo') {
+        document.getElementById('newItemMarca').value = '';
+        document.getElementById('newItemSerie').value = '';
+        document.getElementById('newItemAnio').value = '';
+        document.getElementById('newItemEstadoEquipo').value = 'operativo';
+      }
+      if (category !== 'Material') {
+        document.getElementById('newItemEstadoMaterial').value = 'Buen estado';
+      }
+
+      // Show the selected section and set required fields
+      if (category === 'Insumo') {
+        secInsumo.classList.remove('hidden');
+        document.getElementById('newItemUnidad').required = true;
+      } else if (category === 'Equipo') {
+        secEquipo.classList.remove('hidden');
+        document.getElementById('newItemMarca').required = true;
+        document.getElementById('newItemAnio').required = true;
+        document.getElementById('newItemEstadoEquipo').required = true;
+      } else if (category === 'Material') {
+        secMaterial.classList.remove('hidden');
+        document.getElementById('newItemEstadoMaterial').required = true;
+      }
+    }
+
     function handleCreateInventoryItem(e) {
       e.preventDefault();
       const plant = document.getElementById('newItemPlanta').value;
       const category = document.getElementById('newItemCategoria').value;
       const name = document.getElementById('newItemNombre').value.trim();
       const stock = parseFloat(document.getElementById('newItemStock').value) || 0;
-      const unit = document.getElementById('newItemUnidad').value.trim();
-      const expiryInput = document.getElementById('newItemVencimiento').value;
+      const observation = document.getElementById('newItemObservacion').value.trim();
+
+      let unit = 'Unidades';
+      let expiry = 'S/F';
+      let notes = '';
+
+      // Validate only the visible fields based on the selected category
+      if (category === 'Insumo') {
+        unit = document.getElementById('newItemUnidad').value;
+        const vencimiento = document.getElementById('newItemVencimiento').value;
+        expiry = vencimiento || 'S/F';
+        notes = observation;
+      } else if (category === 'Equipo') {
+        const marca = document.getElementById('newItemMarca').value.trim();
+        const serie = document.getElementById('newItemSerie').value.trim();
+        const anio = document.getElementById('newItemAnio').value.trim();
+        const estado = document.getElementById('newItemEstadoEquipo').value;
+
+        if (!marca || !anio) {
+          showToast('Por favor completa todos los campos requeridos para Equipo', 'warning');
+          return;
+        }
+
+        unit = 'Unidades';
+        expiry = 'S/F';
+        const serialText = serie ? serie : 'Sin Etiqueta';
+        notes = `Marca: ${marca} | Serie: ${serialText} | Año: ${anio} | Estado: ${estado.toUpperCase()}${observation ? ' | Obs: ' + observation : ''}`;
+
+        // Dynamic Action: Inject new machinery directly into the Cards Region
+        const newEqId = "EQ-0" + (appState.equipment.length + 1);
+        appState.equipment.unshift({
+          id: newEqId,
+          plant: plant,
+          name: name,
+          brand: marca,
+          serial: serie,
+          year: anio,
+          status: estado,
+          damageReason: estado !== 'operativo' ? 'Daño inicial reportado al registrar.' : ''
+        });
+      } else if (category === 'Material') {
+        const estado = document.getElementById('newItemEstadoMaterial').value;
+        unit = 'Unidades';
+        expiry = 'S/F';
+        notes = `Estado: ${estado}${observation ? ' | Obs: ' + observation : ''}`;
+      }
 
       const newId = "INV-" + Math.floor(100 + Math.random() * 900);
       appState.inventory.unshift({
@@ -1328,15 +1479,17 @@
         name: name,
         stock: stock,
         unit: unit,
-        expiry: expiryInput || 'S/F'
+        expiry: expiry,
+        notes: notes
       });
 
       closeModalNewItem();
       renderInventoryTable();
+      renderEquipmentCards();
       updateDispatchItemSelect();
       updateDashboardMetrics();
       showToast('Ítem guardado con éxito en Bodega Central', 'success');
-      e.target.reset();
+      document.getElementById('newItemForm').reset();
     }
 
     // 7. PÁGINA 4: MAQUINARIA EN FINCA (CARDS REGION)
