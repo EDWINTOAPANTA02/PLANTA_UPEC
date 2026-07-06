@@ -1,0 +1,1587 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FIACA - Gestión de Plantas Piloto | Oracle APEX 22.1</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome CDN (Emulating Font APEX icons) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts - Inter for APEX enterprise styling -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            upecGreen: '#056734',
+            upecGreenDark: '#034522',
+            upecGreenLight: '#078644',
+            upecYellow: '#FFD45B',
+            upecYellowDark: '#DCA310',
+            apexBg: '#F5F5F5',
+            apexSidebar: '#1E293B',
+            apexBorder: '#CBD5E1',
+            apexText: '#1E293B',
+            apexMuted: '#64748B'
+          },
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Estilos Nativos Estilo Oracle APEX 22.1 Universal Theme */
+    body {
+      background-color: #F5F5F5;
+      color: #1E293B;
+      font-family: 'Inter', -apple-system, sans-serif;
+      font-size: 13px;
+    }
+
+    /* APEX Region Styling (t-Region) */
+    .t-Region {
+      background-color: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+    .t-Region-header {
+      padding: 10px 16px;
+      border-bottom: 1px solid #E2E8F0;
+      background-color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top-left-radius: 4px;
+      border-top-right-radius: 4px;
+    }
+    .t-Region-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #0F172A;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .t-Region-body {
+      padding: 16px;
+    }
+
+    /* APEX Interactive Report Table Layout */
+    .apex-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+    .apex-table th {
+      background-color: #F8FAFC;
+      color: #475569;
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 10px 12px;
+      border-bottom: 2px solid #CBD5E1;
+      border-top: 1px solid #E2E8F0;
+      text-align: left;
+    }
+    .apex-table td {
+      padding: 9px 12px;
+      border-bottom: 1px solid #E2E8F0;
+      color: #334155;
+    }
+    .apex-table tr:nth-child(even) {
+      background-color: #F8FAFC;
+    }
+    .apex-table tr:hover {
+      background-color: #F1F5F9;
+    }
+
+    /* APEX Badges */
+    .apex-badge-caducado {
+      background-color: #FEE2E2;
+      color: #991B1B;
+      font-weight: 700;
+      font-size: 10.5px;
+      padding: 2px 7px;
+      border-radius: 3px;
+      border: 1px solid #FCA5A5;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .apex-badge-alert {
+      background-color: #FFD45B;
+      color: #451A03;
+      font-weight: 700;
+      font-size: 10.5px;
+      padding: 2px 7px;
+      border-radius: 3px;
+      border: 1px solid #DCA310;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .apex-badge-ok {
+      background-color: #DCFCE7;
+      color: #14532D;
+      font-weight: 600;
+      font-size: 10.5px;
+      padding: 2px 7px;
+      border-radius: 3px;
+      border: 1px solid #86EFAC;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* APEX Form Field styling */
+    .apex-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 4px;
+      display: block;
+    }
+    .apex-input {
+      width: 100%;
+      border: 1px solid #CBD5E1;
+      border-radius: 3px;
+      padding: 7px 10px;
+      font-size: 13px;
+      background-color: #FFFFFF;
+      transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+    .apex-input:focus {
+      outline: none;
+      border-color: #056734;
+      box-shadow: 0 0 0 2px rgba(5, 103, 52, 0.2);
+    }
+
+    /* APEX IR Toolbar Controls */
+    .apex-ir-toolbar {
+      background-color: #F1F5F9;
+      border: 1px solid #CBD5E1;
+      border-bottom: none;
+      padding: 8px 12px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border-top-left-radius: 4px;
+      border-top-right-radius: 4px;
+    }
+
+    /* Scrollbar minimal Styling */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F1F5F9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #94A3B8;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden bg-apexBg">
+
+  <!-- 1. APPLICATION HEADER - Oracle APEX Style (Verde UPEC #056734) -->
+  <header class="bg-upecGreen text-white h-12 flex items-center justify-between px-4 shadow-md z-30 flex-shrink-0">
+    <div class="flex items-center space-x-3">
+      <!-- Sidebar Toggle Button -->
+      <button id="sidebarToggleBtn" onclick="toggleSidebar()" class="p-1.5 rounded hover:bg-upecGreenDark focus:outline-none transition-colors" title="Contraer/Expandir Menú">
+        <i class="fa-solid fa-bars text-lg"></i>
+      </button>
+      <!-- Logo & App Title -->
+      <div class="flex items-center space-x-2">
+        <div class="bg-white text-upecGreen font-black text-xs px-2 py-0.5 rounded border border-upecYellow font-mono tracking-wider">
+          UPEC
+        </div>
+        <span class="font-bold text-sm sm:text-base tracking-wide flex items-center gap-2">
+          FIACA <span class="font-normal text-xs opacity-90 border-l border-white/30 pl-2">Gestión de Plantas Piloto</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- Right Header Controls -->
+    <div class="flex items-center space-x-4">
+      <div class="hidden md:flex items-center text-xs bg-upecGreenDark/70 px-3 py-1 rounded border border-white/10 gap-2">
+        <i class="fa-solid fa-industry text-upecYellow"></i>
+        <span>Planta Piloto Universitaria</span>
+      </div>
+      <!-- User Profile -->
+      <div class="relative">
+        <div class="flex items-center space-x-2 bg-upecGreenDark px-3 py-1 rounded text-xs border border-white/20">
+          <i class="fa-solid fa-user-gear text-upecYellow"></i>
+          <span class="hidden sm:inline font-semibold">admin@upec.edu.ec</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER (Sidebar + Content) -->
+  <div class="flex flex-1 overflow-hidden relative">
+
+    <!-- 2. NAVIGATION SIDEBAR (APEX Dark Slate Menu with 5 Mandatory Pages) -->
+    <aside id="apexSidebar" class="bg-apexSidebar text-slate-300 w-64 flex-shrink-0 flex flex-col transition-all duration-300 z-20 border-r border-slate-700">
+      
+      <!-- APEX Environment Banner -->
+      <div class="p-3 bg-slate-900/80 border-b border-slate-800 text-xs flex items-center gap-2 text-slate-300">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="font-semibold text-slate-200">APEX 22.1 Universal Theme</span>
+      </div>
+
+      <!-- Navigation Links - 5 MANDATORY PAGES -->
+      <nav class="flex-1 overflow-y-auto py-2 space-y-0.5">
+        
+        <!-- PÁGINA 1: DASHBOARD GENERAL (OBLIGATORIO) -->
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item active w-full flex items-center space-x-3 px-4 py-2.5 text-xs font-semibold text-left border-l-4 border-upecGreen bg-slate-800/90 text-white transition-all">
+          <i class="fa-solid fa-chart-pie w-5 text-center text-upecYellow"></i>
+          <span class="sidebar-text">1. Dashboard General</span>
+        </button>
+
+        <!-- PÁGINA 2: CONFIGURACIÓN DE PLANTAS E INFRAESTRUCTURA -->
+        <button onclick="switchTab('plantas')" id="nav-plantas" class="nav-item w-full flex items-center space-x-3 px-4 py-2.5 text-xs font-semibold text-left border-l-4 border-transparent text-slate-300 hover:bg-slate-800 hover:text-white transition-all">
+          <i class="fa-solid fa-building-flag w-5 text-center text-sky-400"></i>
+          <span class="sidebar-text">2. Gestión de Plantas e Inf.</span>
+        </button>
+
+        <!-- PÁGINA 3: BODEGA CENTRAL (Interactive Report + Faceted Search) -->
+        <button onclick="switchTab('inventario')" id="nav-inventario" class="nav-item w-full flex items-center space-x-3 px-4 py-2.5 text-xs font-semibold text-left border-l-4 border-transparent text-slate-300 hover:bg-slate-800 hover:text-white transition-all">
+          <i class="fa-solid fa-table-list w-5 text-center text-emerald-400"></i>
+          <span class="sidebar-text">3. Bodega Central (Faceted IR)</span>
+        </button>
+
+        <!-- PÁGINA 4: MAQUINARIA EN FINCA (Cards Region) -->
+        <button onclick="switchTab('equipos')" id="nav-equipos" class="nav-item w-full flex items-center space-x-3 px-4 py-2.5 text-xs font-semibold text-left border-l-4 border-transparent text-slate-300 hover:bg-slate-800 hover:text-white transition-all">
+          <i class="fa-solid fa-gears w-5 text-center text-purple-400"></i>
+          <span class="sidebar-text">4. Maquinaria (Cards Region)</span>
+        </button>
+
+        <!-- PÁGINA 5: MÓDULO DE DESPACHOS TRANSACCIONALES -->
+        <button onclick="switchTab('despachos')" id="nav-despachos" class="nav-item w-full flex items-center space-x-3 px-4 py-2.5 text-xs font-semibold text-left border-l-4 border-transparent text-slate-300 hover:bg-slate-800 hover:text-white transition-all">
+          <i class="fa-solid fa-truck-arrow-right w-5 text-center text-amber-400"></i>
+          <span class="sidebar-text">5. Módulo de Despachos</span>
+        </button>
+
+        <div class="pt-4 pb-1 px-4 text-[10px] font-bold uppercase tracking-wider text-slate-500 sidebar-text">
+          Sistema & Auditoría
+        </div>
+
+        <button onclick="showToast('Sistema en memoria cargado correctamente. Fecha actual: Julio 2026', 'info')" class="w-full flex items-center space-x-3 px-4 py-2 text-xs font-medium text-left border-l-4 border-transparent text-slate-400 hover:bg-slate-800 hover:text-white">
+          <i class="fa-solid fa-shield-halved w-5 text-center"></i>
+          <span class="sidebar-text">Auditoría FIACA UPEC</span>
+        </button>
+
+      </nav>
+
+      <!-- Sidebar Footer -->
+      <div class="p-3 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
+        <span class="sidebar-text">FIACA - UPEC</span>
+        <span class="bg-slate-800 px-1.5 py-0.5 rounded text-[10px] text-upecYellow font-mono">Julio 2026</span>
+      </div>
+    </aside>
+
+    <!-- CONTENT WRAPPER -->
+    <main class="flex-1 flex flex-col overflow-y-auto bg-apexBg">
+
+      <!-- 3. BREADCRUMB REGION (Barra Blanca APEX) -->
+      <section class="bg-white border-b border-apexBorder px-6 py-3 flex flex-wrap items-center justify-between shadow-xs flex-shrink-0">
+        <div>
+          <h1 id="pageTitle" class="text-lg font-bold text-slate-900 flex items-center gap-2">
+            <i class="fa-solid fa-chart-pie text-upecGreen"></i>
+            <span>Dashboard General</span>
+          </h1>
+          <nav class="flex items-center space-x-1 text-xs text-slate-500 mt-0.5">
+            <span>Home</span>
+            <i class="fa-solid fa-chevron-right text-[9px] text-slate-400"></i>
+            <span id="breadcrumbPath" class="text-upecGreen font-medium">Dashboard General</span>
+          </nav>
+        </div>
+
+        <div class="flex items-center space-x-2 mt-2 sm:mt-0">
+          <span class="text-xs bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded border border-emerald-200 font-mono font-bold">
+            <i class="fa-solid fa-calendar-day text-upecGreen mr-1"></i>03/07/2026
+          </span>
+        </div>
+      </section>
+
+      <!-- PAGE CONTENT AREA -->
+      <div class="p-6 space-y-6 flex-1">
+
+        <!-- ================= PÁGINA 1: DASHBOARD GENERAL (OBLIGATORIO) ================= -->
+        <div id="page-dashboard" class="tab-content space-y-6">
+
+          <!-- APEX BADGE LIST - 4 METRIC CARDS EN TIEMPO REAL -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            
+            <!-- Badge 1: Total Ítems en Bodega -->
+            <div class="t-Region p-4 border-l-4 border-l-upecGreen flex items-center justify-between">
+              <div>
+                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Total Ítems en Bodega</div>
+                <div class="text-2xl font-bold text-slate-800 mt-1" id="dashTotalItems">0</div>
+                <div class="text-[11px] text-emerald-600 font-medium mt-1 flex items-center gap-1">
+                  <i class="fa-solid fa-boxes-stacked"></i> Recursos e Insumos
+                </div>
+              </div>
+              <div class="w-11 h-11 rounded-full bg-emerald-50 text-upecGreen flex items-center justify-center text-lg border border-emerald-100">
+                <i class="fa-solid fa-cubes"></i>
+              </div>
+            </div>
+
+            <!-- Badge 2: Insumos por Comprar (Cantidad 0 - Alerta Amarilla) -->
+            <div class="t-Region p-4 border-l-4 border-l-upecYellow bg-amber-50/40 flex items-center justify-between">
+              <div>
+                <div class="text-xs font-semibold text-amber-900 uppercase tracking-wide">Insumos por Comprar</div>
+                <div class="text-2xl font-bold text-amber-950 mt-1" id="dashStockZero">0</div>
+                <div class="text-[11px] text-amber-800 font-medium mt-1">
+                  Stock agotado (0.00)
+                </div>
+              </div>
+              <div class="w-11 h-11 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center text-lg border border-amber-300">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+              </div>
+            </div>
+
+            <!-- Badge 3: Equipos Inactivos / Dañados (Alerta Roja) -->
+            <div class="t-Region p-4 border-l-4 border-l-red-500 bg-red-50/30 flex items-center justify-between">
+              <div>
+                <div class="text-xs font-semibold text-red-900 uppercase tracking-wide">Equipos Inactivos / Dañados</div>
+                <div class="text-2xl font-bold text-red-950 mt-1" id="dashEquipDamaged">0</div>
+                <div class="text-[11px] text-red-700 font-medium mt-1">
+                  Fallo técnico / Mantenimiento
+                </div>
+              </div>
+              <div class="w-11 h-11 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-lg border border-red-200">
+                <i class="fa-solid fa-wrench"></i>
+              </div>
+            </div>
+
+            <!-- Badge 4: Incidencias de Infraestructura Activas -->
+            <div class="t-Region p-4 border-l-4 border-l-sky-500 flex items-center justify-between">
+              <div>
+                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Incidencias Infraestructura</div>
+                <div class="text-2xl font-bold text-slate-800 mt-1" id="dashIncidentsActive">0</div>
+                <div class="text-[11px] text-sky-600 font-medium mt-1">
+                  Goteras, pintura, eléctrico
+                </div>
+              </div>
+              <div class="w-11 h-11 rounded-full bg-sky-50 text-sky-600 flex items-center justify-center text-lg border border-sky-100">
+                <i class="fa-solid fa-building-circle-exclamation"></i>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- PANEL DE ALERTAS CRÍTICAS Y RESUMEN DE ESTADO -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Panel de Alertas Críticas (Caducidad y Fallos) -->
+            <div class="t-Region lg:col-span-2">
+              <div class="t-Region-header border-l-4 border-l-red-500">
+                <div class="t-Region-title text-red-800">
+                  <i class="fa-solid fa-circle-exclamation text-red-600"></i>
+                  <span>Panel de Alertas Críticas de Inventario y Salud Físico-Técnica</span>
+                </div>
+                <span class="text-xs text-slate-400">Actualizado en tiempo real</span>
+              </div>
+              
+              <div class="t-Region-body p-0">
+                <ul class="divide-y divide-slate-200 text-xs" id="dashCriticalAlertsList">
+                  <!-- Dynamically rendered critical alerts -->
+                </ul>
+              </div>
+            </div>
+
+            <!-- Panel de Plantas Piloto Registradas -->
+            <div class="t-Region">
+              <div class="t-Region-header">
+                <div class="t-Region-title">
+                  <i class="fa-solid fa-industry text-upecGreen"></i>
+                  <span>Estado de Plantas Piloto</span>
+                </div>
+              </div>
+              <div class="t-Region-body space-y-4">
+                <p class="text-xs text-slate-500">Listado actual de infraestructuras registradas en la Planta Piloto Universitaria FIACA UPEC:</p>
+                <div id="dashPlantsList" class="space-y-2">
+                  <!-- Dynamically populated -->
+                </div>
+                <div class="pt-3 border-t border-slate-200 text-[11px] text-slate-500">
+                  <i class="fa-solid fa-lightbulb text-upecYellow mr-1"></i>
+                  Para agregar nuevas plantas piloto, vaya a la <a href="#" onclick="switchTab('plantas')" class="text-upecGreen font-bold hover:underline">Página 2: Gestión de Plantas</a>.
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ================= PÁGINA 2: CONFIGURACIÓN DE PLANTAS E INFRAESTRUCTURA ================= -->
+        <div id="page-plantas" class="tab-content hidden space-y-6">
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <!-- FORMULARIO A: CREAR NUEVA PLANTA PILOTO -->
+            <div class="t-Region">
+              <div class="t-Region-header border-l-4 border-l-upecGreen">
+                <div class="t-Region-title">
+                  <i class="fa-solid fa-plus-circle text-upecGreen"></i>
+                  <span>Formulario A: Crear Nueva Planta Piloto</span>
+                </div>
+              </div>
+              <form onsubmit="handleCreatePlant(event)" class="t-Region-body space-y-4">
+                <div>
+                  <label class="apex-label" for="nombreNuevaPlanta">Nombre de la Nueva Planta Piloto *</label>
+                  <input type="text" id="nombreNuevaPlanta" required placeholder="Ej: Planta Piloto de Lácteos y Quesos" class="apex-input">
+                  <p class="text-[11px] text-slate-500 mt-1">Al presionar "Crear Planta", el motor JS inyectará automáticamente la nueva planta en todos los selectores del prototipo.</p>
+                </div>
+
+                <div class="pt-2 flex justify-end">
+                  <button type="submit" class="px-4 py-2 bg-upecGreen hover:bg-upecGreenDark text-white text-xs font-bold rounded shadow-xs flex items-center gap-1.5">
+                    <i class="fa-solid fa-save"></i>
+                    <span>Crear Planta (Inyección Global APEX)</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- FORMULARIO B: REPORTAR PROBLEMA DE INFRAESTRUCTURA -->
+            <div class="t-Region">
+              <div class="t-Region-header border-l-4 border-l-upecYellow">
+                <div class="t-Region-title">
+                  <i class="fa-solid fa-triangle-exclamation text-amber-700"></i>
+                  <span>Formulario B: Reportar Problema de Infraestructura</span>
+                </div>
+              </div>
+              <form onsubmit="handleReportIncident(event)" class="t-Region-body space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="apex-label" for="incidenciaPlanta">Seleccionar Planta Piloto *</label>
+                    <select id="incidenciaPlanta" required class="apex-input plant-select-global">
+                      <!-- Populated dynamically via JS -->
+                    </select>
+                  </div>
+                  <div>
+                    <label class="apex-label" for="incidenciaTipo">Tipo de Falla *</label>
+                    <select id="incidenciaTipo" required class="apex-input">
+                      <option value="Goteras en Techo">Goteras en Techo</option>
+                      <option value="Falta de Pintura / Humedad">Falta de Pintura / Humedad</option>
+                      <option value="Fallo Eléctrico / Luminarias">Fallo Eléctrico / Luminarias</option>
+                      <option value="Tubería / Desagüe">Tubería / Desagüe</option>
+                      <option value="Otro Físico">Otro Físico</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="apex-label" for="incidenciaDetalle">Detalles u Observaciones del Problema *</label>
+                  <textarea id="incidenciaDetalle" rows="2" required placeholder="Describa la afectación física o área inhabilitada..." class="apex-input"></textarea>
+                </div>
+
+                <div class="pt-2 flex justify-end">
+                  <button type="submit" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold rounded shadow-xs flex items-center gap-1.5">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <span>Guardar Problema Físico</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+
+          </div>
+
+          <!-- REPORTE DE INCIDENCIAS REGISTRADAS -->
+          <div class="t-Region">
+            <div class="t-Region-header">
+              <div class="t-Region-title">
+                <i class="fa-solid fa-list-check text-upecGreen"></i>
+                <span>Reporte: Incidencias de Infraestructura Registradas</span>
+              </div>
+              <span class="text-xs text-slate-500 font-mono" id="incidentsCountDisplay">0 registradas</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="apex-table" id="tablaIncidencias">
+                <thead>
+                  <tr>
+                    <th class="w-16">ID</th>
+                    <th>Planta Piloto</th>
+                    <th>Tipo de Falla</th>
+                    <th>Detalles u Observaciones</th>
+                    <th>Fecha Reporte</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200">
+                  <!-- Dynamic JS content -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+
+        <!-- ================= PÁGINA 3: BODEGA CENTRAL (Interactive Report + Faceted Search) ================= -->
+        <div id="page-inventario" class="tab-content hidden space-y-4">
+
+          <!-- ESTRUCTURA FACETED SEARCH (2 COLUMNAS) -->
+          <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+            <!-- COLUMNA IZQUIERDA: FILTROS FACETADOS (APEX Faceted Search Region) -->
+            <div class="lg:col-span-1 t-Region p-4 h-fit space-y-5 bg-white border border-slate-300">
+              <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                <h3 class="font-bold text-xs uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                  <i class="fa-solid fa-filter text-upecGreen"></i>
+                  <span>Filtros Facetados</span>
+                </h3>
+                <button onclick="resetFacetedFilters()" class="text-[11px] text-upecGreen hover:underline font-semibold">Limpiar</button>
+              </div>
+
+              <!-- Facet 1: Plantas Piloto (Checkboxes) -->
+              <div>
+                <label class="apex-label text-slate-800 font-bold mb-2">Planta Piloto</label>
+                <div id="facetedPlantCheckboxGroup" class="space-y-1.5 max-h-48 overflow-y-auto text-xs text-slate-700">
+                  <!-- Dynamic plant checkboxes -->
+                </div>
+              </div>
+
+              <!-- Facet 2: Categorías (Checkboxes) -->
+              <div>
+                <label class="apex-label text-slate-800 font-bold mb-2">Categoría</label>
+                <div class="space-y-1.5 text-xs text-slate-700">
+                  <label class="flex items-center gap-2 cursor-pointer hover:text-slate-900">
+                    <input type="checkbox" value="Insumo" class="facet-cat-checkbox rounded text-upecGreen focus:ring-upecGreen" onchange="renderInventoryTable()" checked>
+                    <span>Insumos</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer hover:text-slate-900">
+                    <input type="checkbox" value="Material" class="facet-cat-checkbox rounded text-upecGreen focus:ring-upecGreen" onchange="renderInventoryTable()" checked>
+                    <span>Materiales</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer hover:text-slate-900">
+                    <input type="checkbox" value="Equipo" class="facet-cat-checkbox rounded text-upecGreen focus:ring-upecGreen" onchange="renderInventoryTable()" checked>
+                    <span>Equipos</span>
+                  </label>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- COLUMNA DERECHA: TABLA INTERACTIVE REPORT (IR) -->
+            <div class="lg:col-span-3 t-Region">
+              
+              <!-- TOOLBAR INTERACTIVE REPORT -->
+              <div class="apex-ir-toolbar">
+                <div class="flex flex-wrap items-center gap-2">
+                  <!-- Search Box -->
+                  <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-2.5 text-slate-400">
+                      <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                    </span>
+                    <input type="text" id="irSearchInput" onkeyup="filterInventoryTable()" placeholder="Buscar por código o nombre..." class="pl-8 pr-3 py-1.5 text-xs border border-slate-300 rounded bg-white w-56 sm:w-72 focus:outline-none focus:border-upecGreen">
+                  </div>
+                </div>
+
+                <!-- Action Button: Añadir Ítem -->
+                <div>
+                  <button onclick="openModalNewItem()" class="px-3.5 py-1.5 bg-upecGreen hover:bg-upecGreenDark text-white text-xs font-bold rounded shadow-xs flex items-center gap-1.5">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Añadir Ítem a Bodega</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- TABLA INTERACTIVA IR -->
+              <div class="overflow-x-auto">
+                <table class="apex-table" id="tablaInventario">
+                  <thead>
+                    <tr>
+                      <th class="w-16">ID</th>
+                      <th>Planta Piloto</th>
+                      <th>Nombre del Recurso</th>
+                      <th class="text-right">Stock</th>
+                      <th>Unidad</th>
+                      <th>Vencimiento</th>
+                      <th>Estado / Alerta</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-200">
+                    <!-- Dynamic JS content -->
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="px-4 py-2.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-600">
+                <div id="irCountDisplay">Mostrando items</div>
+                <div class="flex items-center space-x-1">
+                  <span class="px-2.5 py-1 bg-upecGreen text-white rounded font-medium">Pag. 1</span>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ================= PÁGINA 4: MAQUINARIA EN FINCA (Cards Region - Reemplazo del Cuaderno) ================= -->
+        <div id="page-equipos" class="tab-content hidden space-y-6">
+
+          <!-- Selector Superior de Planta Piloto -->
+          <div class="t-Region p-4 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+              <i class="fa-solid fa-filter text-upecGreen text-base"></i>
+              <span class="font-bold text-slate-800">Filtrar Maquinaria por Planta Piloto:</span>
+            </div>
+            
+            <div class="flex-1 max-w-md">
+              <select id="plantaCardFilter" onchange="renderEquipmentCards()" class="apex-input font-medium text-slate-700 plant-select-global">
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+
+            <div class="text-xs text-slate-500 font-medium">
+              <span id="equipmentCountDisplay">0 máquinas cargadas</span>
+            </div>
+          </div>
+
+          <!-- GRID DE TARJETAS COMPACTAS (APEX Cards Region) -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="equipmentCardsGrid">
+            <!-- Dynamically populated via JS -->
+          </div>
+
+        </div>
+
+
+        <!-- ================= PÁGINA 5: MÓDULO DE DESPACHOS TRANSACCIONALES ================= -->
+        <div id="page-despachos" class="tab-content hidden space-y-6">
+
+          <!-- FORMULARIO DE CAPTURA EN 2 COLUMNAS -->
+          <div class="t-Region">
+            <div class="t-Region-header border-l-4 border-l-upecGreen">
+              <div class="t-Region-title">
+                <i class="fa-solid fa-truck-arrow-right text-upecGreen"></i>
+                <span>Formulario de Registro de Despacho Transaccional</span>
+              </div>
+            </div>
+
+            <form onsubmit="handleProcessDispatch(event)" class="t-Region-body space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                
+                <!-- 1. Planta Origen -->
+                <div>
+                  <label class="apex-label" for="despachoPlantaOrigen">1. Planta Piloto Origen *</label>
+                  <select id="despachoPlantaOrigen" onchange="updateDispatchItemSelect()" required class="apex-input plant-select-global">
+                    <!-- Dynamic select -->
+                  </select>
+                </div>
+
+                <!-- 2. Seleccionar Ítem -->
+                <div>
+                  <label class="apex-label" for="despachoItemSelect">2. Seleccionar Ítem de Bodega *</label>
+                  <select id="despachoItemSelect" required class="apex-input font-medium">
+                    <!-- Populated dynamically based on plant selection -->
+                  </select>
+                </div>
+
+                <!-- 3. Cantidad a Despachar -->
+                <div>
+                  <label class="apex-label" for="despachoCantidad">3. Cantidad a Despachar *</label>
+                  <input type="number" step="0.01" min="0.01" id="despachoCantidad" required placeholder="0.00" class="apex-input font-mono">
+                </div>
+
+                <!-- 4. Estudiante / Destinatario -->
+                <div>
+                  <label class="apex-label" for="despachoEstudiante">4. Estudiante / Destinatario (Nombre/Cédula) *</label>
+                  <input type="text" id="despachoEstudiante" required placeholder="Ej: 0401829301 - Juan Pérez" class="apex-input">
+                </div>
+
+                <!-- 5. Técnico que Despacha -->
+                <div>
+                  <label class="apex-label" for="despachoTecnico">5. Técnico que Despacha *</label>
+                  <input type="text" id="despachoTecnico" required placeholder="Ej: Ing. Carlos Narváez (Técnico)" class="apex-input">
+                </div>
+
+                <!-- 6. Fecha de Despacho -->
+                <div>
+                  <label class="apex-label" for="despachoFecha">6. Fecha de Despacho *</label>
+                  <input type="date" id="despachoFecha" required value="2026-07-03" class="apex-input font-mono">
+                </div>
+
+              </div>
+
+              <div class="pt-3 border-t border-slate-200 flex items-center justify-end space-x-2">
+                <button type="reset" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded border border-slate-300">
+                  Limpiar Formulario
+                </button>
+                <button type="submit" class="px-5 py-2 bg-upecGreen hover:bg-upecGreenDark text-white text-xs font-bold rounded shadow-xs flex items-center gap-1.5">
+                  <i class="fa-solid fa-check-double"></i>
+                  <span>Procesar Despacho (Descuenta Stock)</span>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- HISTORIAL DE DESPACHOS RECIENTES (PARTE INFERIOR MISMA PÁGINA) -->
+          <div class="t-Region">
+            <div class="t-Region-header">
+              <div class="t-Region-title">
+                <i class="fa-solid fa-clock-rotate-left text-upecGreen"></i>
+                <span>Historial de Despachos Recientes</span>
+              </div>
+              <span class="text-xs text-slate-500 font-mono" id="dispatchHistoryCount">0 despachos</span>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="apex-table" id="tablaHistorialDespachos">
+                <thead>
+                  <tr>
+                    <th class="w-16">ID</th>
+                    <th>Planta Origen</th>
+                    <th>Elemento Despachado</th>
+                    <th class="text-right">Cantidad</th>
+                    <th>Estudiante / Destinatario</th>
+                    <th>Técnico que Despacha</th>
+                    <th>Fecha Despacho</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200">
+                  <!-- Dynamically populated -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- FOOTER APEX UNIVERSAL THEME -->
+      <footer class="bg-white border-t border-apexBorder px-6 py-2.5 text-[11px] text-slate-500 flex items-center justify-between flex-shrink-0">
+        <div>Universidad Politécnica Estatal del Carchi - FIACA UPEC © 2026</div>
+        <div class="flex items-center space-x-3">
+          <span>Oracle APEX 22.1 Universal Theme</span>
+          <span class="text-slate-300">|</span>
+          <span class="text-upecGreen font-bold">Planta Piloto UPEC</span>
+        </div>
+      </footer>
+
+    </main>
+  </div>
+
+
+  <!-- MODAL 1: REGISTRO OBLIGATORIO DE DAÑO O MOTIVO DE MANTENIMIENTO -->
+  <div id="damageModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-md shadow-2xl w-full max-w-md border border-slate-300 overflow-hidden">
+      
+      <div class="bg-amber-500 text-slate-950 px-4 py-3 flex items-center justify-between">
+        <h3 class="font-bold text-sm flex items-center gap-2">
+          <i class="fa-solid fa-triangle-exclamation"></i> Registrar Motivo o Daño Específico
+        </h3>
+        <button onclick="closeDamageModal()" class="text-slate-950 hover:text-white">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleSaveDamageReason(event)" class="p-5 space-y-4">
+        <input type="hidden" id="modalEquipmentId">
+        <input type="hidden" id="modalTargetStatus">
+
+        <div>
+          <label class="apex-label">Maquinaria Seleccionada:</label>
+          <div id="modalEquipmentName" class="font-bold text-slate-800 text-sm bg-slate-100 p-2 rounded border border-slate-200"></div>
+        </div>
+
+        <div>
+          <label class="apex-label" for="modalDamageText">Ingresar Daño Específico o Motivo *</label>
+          <textarea id="modalDamageText" required rows="3" placeholder="Ej: Fuga de aceite hidráulico en retén principal o rotura de banda..." class="apex-input"></textarea>
+          <p class="text-[11px] text-amber-800 font-medium mt-1">Este motivo actualizará automáticamente la tarjeta y la bitácora técnica.</p>
+        </div>
+
+        <div class="pt-3 border-t border-slate-200 flex items-center justify-end space-x-2">
+          <button type="button" onclick="closeDamageModal()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded border border-slate-300">
+            Cancelar
+          </button>
+          <button type="submit" class="px-4 py-1.5 bg-upecGreen hover:bg-upecGreenDark text-white text-xs font-bold rounded shadow-xs">
+            Guardar en Bitácora
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- MODAL 2: AÑADIR ÍTEM AL INVENTARIO -->
+  <div id="newItemModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-md shadow-2xl w-full max-w-lg border border-slate-300 overflow-hidden">
+      
+      <div class="bg-upecGreen text-white px-4 py-3 flex items-center justify-between">
+        <h3 class="font-bold text-sm flex items-center gap-2">
+          <i class="fa-solid fa-plus-circle text-upecYellow"></i> Añadir Ítem a Bodega Central
+        </h3>
+        <button onclick="closeModalNewItem()" class="text-white hover:text-upecYellow">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleCreateInventoryItem(event)" class="p-5 space-y-4">
+        
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="apex-label" for="newItemPlanta">Planta Piloto *</label>
+            <select id="newItemPlanta" required class="apex-input plant-select-global">
+              <!-- Dynamic -->
+            </select>
+          </div>
+          <div>
+            <label class="apex-label" for="newItemCategoria">Categoría *</label>
+            <select id="newItemCategoria" required class="apex-input">
+              <option value="Insumo">Insumo</option>
+              <option value="Material">Material</option>
+              <option value="Equipo">Equipo</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="apex-label" for="newItemNombre">Nombre del Recurso *</label>
+          <input type="text" id="newItemNombre" required placeholder="Ej: Nitrato de Calcio USP" class="apex-input">
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="apex-label" for="newItemStock">Stock Inicial *</label>
+            <input type="number" step="0.01" min="0" id="newItemStock" required placeholder="0.00" class="apex-input font-mono">
+          </div>
+          <div>
+            <label class="apex-label" for="newItemUnidad">Unidad *</label>
+            <input type="text" id="newItemUnidad" required placeholder="Kg / Litros / Uds" class="apex-input">
+          </div>
+          <div>
+            <label class="apex-label" for="newItemVencimiento">Vencimiento</label>
+            <input type="date" id="newItemVencimiento" class="apex-input font-mono">
+            <span class="text-[10px] text-slate-400">Dejar vacío para S/F</span>
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-slate-200 flex items-center justify-end space-x-2">
+          <button type="button" onclick="closeModalNewItem()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded border border-slate-300">
+            Cancelar
+          </button>
+          <button type="submit" class="px-4 py-1.5 bg-upecGreen hover:bg-upecGreenDark text-white text-xs font-bold rounded shadow-xs">
+            Guardar Ítem
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- TOAST NOTIFICATIONS UTILITY -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 transform transition-all duration-300 translate-y-20 opacity-0 pointer-events-none">
+    <div id="toastContent" class="px-4 py-3 rounded shadow-xl text-xs font-semibold flex items-center gap-2.5 text-white bg-slate-800 border border-slate-700">
+      <i id="toastIcon" class="fa-solid fa-circle-info"></i>
+      <span id="toastMessage">Notificación APEX</span>
+    </div>
+  </div>
+
+
+  <!-- JAVASCRIPT VANILLA LOGIC (IN-MEMORY DATA STORE + DASHBOARD SYNC) -->
+  <script>
+    // System Reference Date (Julio 2026)
+    const SYSTEM_CURRENT_DATE = "2026-07-03";
+
+    // IN-MEMORY DATA STORE
+    let appState = {
+      plants: [
+        "Planta Piloto de Cereales y Harinas",
+        "Planta Piloto de Extracción de Almidón",
+        "Planta Piloto de Frutas y Vegetales",
+        "Planta Piloto de Procesamiento de Cárnicos",
+        "Planta Piloto de Lácteos y Quesos"
+      ],
+      incidents: [
+        { id: "INC-001", plant: "Planta Piloto de Frutas y Vegetales", type: "Goteras en Techo", details: "Filtración sobre área de despulpadoras durante lluvias.", date: "2026-06-28", status: "Pendiente Decanato" },
+        { id: "INC-002", plant: "Planta Piloto de Procesamiento de Cárnicos", type: "Fallo Eléctrico / Luminarias", details: "Dos tubos LED quemados en la cámara de ahumado.", date: "2026-07-01", status: "En Revisión" }
+      ],
+      inventory: [
+        { id: "INV-101", plant: "Planta Piloto de Frutas y Vegetales", category: "Insumo", name: "Sacarosa Refinada Grado Alimenticio", stock: 120.00, unit: "Kg", expiry: "2026-12-15" },
+        { id: "INV-102", plant: "Planta Piloto de Procesamiento de Cárnicos", category: "Insumo", name: "Nitrito de Sodio 99%", stock: 0.00, unit: "Kg", expiry: "2027-08-10" },
+        { id: "INV-103", plant: "Planta Piloto de Cereales y Harinas", category: "Insumo", name: "Pectina Cítrica de Baja Metoxilación", stock: 15.00, unit: "Kg", expiry: "2025-05-10" }, // CADUCADO (< 2026-07-03)
+        { id: "INV-104", plant: "Planta Piloto de Frutas y Vegetales", category: "Material", name: "Envase Frasco Vidrio 500ml", stock: 450.00, unit: "Unidades", expiry: "S/F" },
+        { id: "INV-105", plant: "Planta Piloto de Extracción de Almidón", category: "Insumo", name: "Metabisulfito de Sodio USP", stock: 0.00, unit: "Kg", expiry: "2026-04-01" }, // CADUCADO + POR COMPRAR
+        { id: "INV-106", plant: "Planta Piloto de Cereales y Harinas", category: "Material", name: "Sacos de Papel Kraft 25kg", stock: 200.00, unit: "Unidades", expiry: "S/F" }
+      ],
+      equipment: [
+        { id: "EQ-01", plant: "Planta Piloto de Cereales y Harinas", name: "Extrusora Doble Tornillo EX-10", brand: "Clextral France", serial: "SN-99401", year: "2021", status: "operativo", damageReason: "" },
+        { id: "EQ-02", plant: "Planta Piloto de Extracción de Almidón", name: "Centrífuga Industrial Decanter CD-200", brand: "Alfa Laval", serial: "SN-AL8830", year: "2019", status: "operativo", damageReason: "" },
+        { id: "EQ-03", plant: "Planta Piloto de Frutas y Vegetales", name: "Marmita Volcable a Vapor 100L", brand: "InoxProcess", serial: "SN-MAR-100", year: "2020", status: "mantenimiento", damageReason: "Fuga de vapor en válvula de seguridad principal." },
+        { id: "EQ-04", plant: "Planta Piloto de Procesamiento de Cárnicos", name: "Embutidora Hidráulica EH-30", brand: "Mainca Spain", serial: "SN-EH30-88", year: "2018", status: "inactivo", damageReason: "Fallo en motor hidráulico principal. Requiere bobinado." },
+        { id: "EQ-05", plant: "Planta Piloto de Procesamiento de Cárnicos", name: "Cámara de Maduración y Ahumado", brand: "Fessmann", serial: "SN-FM-2022", year: "2022", status: "operativo", damageReason: "" },
+        { id: "EQ-06", plant: "Planta Piloto de Frutas y Vegetales", name: "Liofilizador de Alimentos LIO-5", brand: "Labconco", serial: "", year: "2023", status: "operativo", damageReason: "" }
+      ],
+      dispatches: [
+        { id: "DSP-001", plant: "Planta Piloto de Frutas y Vegetales", item: "Sacarosa Refinada Grado Alimenticio", qty: 25.00, recipient: "0401829301 - Carlos Benavides", technician: "Ing. Carlos Narváez", date: "2026-07-02" }
+      ]
+    };
+
+    // INITIALIZATION
+    document.addEventListener("DOMContentLoaded", function() {
+      updateAllPlantSelects();
+      renderFacetedPlantCheckboxes();
+      renderIncidentsTable();
+      renderInventoryTable();
+      renderEquipmentCards();
+      renderDispatchHistoryTable();
+      updateDispatchItemSelect();
+      updateDashboardMetrics();
+    });
+
+    // 1. TOGGLE SIDEBAR MENU
+    let sidebarCollapsed = false;
+    function toggleSidebar() {
+      const sidebar = document.getElementById('apexSidebar');
+      const texts = document.querySelectorAll('.sidebar-text');
+      sidebarCollapsed = !sidebarCollapsed;
+
+      if (sidebarCollapsed) {
+        sidebar.classList.remove('w-64');
+        sidebar.classList.add('w-16');
+        texts.forEach(el => el.classList.add('hidden'));
+      } else {
+        sidebar.classList.remove('w-16');
+        sidebar.classList.add('w-64');
+        texts.forEach(el => el.classList.remove('hidden'));
+      }
+    }
+
+    // 2. SWITCH TAB (5 MANDATORY PAGES)
+    function switchTab(pageId) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+      
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active', 'border-upecGreen', 'bg-slate-800/90', 'text-white');
+        item.classList.add('border-transparent', 'text-slate-300');
+      });
+
+      const targetPage = document.getElementById('page-' + pageId);
+      if (targetPage) targetPage.classList.remove('hidden');
+
+      const activeNav = document.getElementById('nav-' + pageId);
+      if (activeNav) {
+        activeNav.classList.add('active', 'border-upecGreen', 'bg-slate-800/90', 'text-white');
+        activeNav.classList.remove('border-transparent', 'text-slate-300');
+      }
+
+      const titleElem = document.getElementById('pageTitle');
+      const breadcrumbElem = document.getElementById('breadcrumbPath');
+
+      switch (pageId) {
+        case 'dashboard':
+          titleElem.innerHTML = '<i class="fa-solid fa-chart-pie text-upecGreen"></i><span>Dashboard General</span>';
+          breadcrumbElem.innerText = 'Dashboard General';
+          updateDashboardMetrics();
+          break;
+        case 'plantas':
+          titleElem.innerHTML = '<i class="fa-solid fa-building-flag text-upecGreen"></i><span>Configuración de Plantas e Infraestructura</span>';
+          breadcrumbElem.innerText = 'Gestión de Plantas e Infraestructura';
+          break;
+        case 'inventario':
+          titleElem.innerHTML = '<i class="fa-solid fa-table-list text-upecGreen"></i><span>Bodega Central (Interactive Report + Faceted Search)</span>';
+          breadcrumbElem.innerText = 'Bodega Central';
+          break;
+        case 'equipos':
+          titleElem.innerHTML = '<i class="fa-solid fa-gears text-upecGreen"></i><span>Maquinaria en Finca (Cards Region)</span>';
+          breadcrumbElem.innerText = 'Maquinaria en Finca';
+          break;
+        case 'despachos':
+          titleElem.innerHTML = '<i class="fa-solid fa-truck-arrow-right text-upecGreen"></i><span>Módulo de Despachos Transaccionales</span>';
+          breadcrumbElem.innerText = 'Módulo de Despachos';
+          break;
+      }
+    }
+
+    // 3. UPDATE ALL PLANT SELECTORS GLOBALLY
+    function updateAllPlantSelects() {
+      const selectElements = document.querySelectorAll('.plant-select-global');
+
+      selectElements.forEach(select => {
+        const currentVal = select.value;
+        const isFilterSelect = select.id === 'plantaCardFilter';
+        
+        let html = '';
+        if (isFilterSelect) {
+          html += '<option value="ALL">Todas las Plantas Piloto</option>';
+        }
+
+        appState.plants.forEach(plant => {
+          html += `<option value="${plant}">${plant}</option>`;
+        });
+
+        select.innerHTML = html;
+        if (currentVal && Array.from(select.options).some(o => o.value === currentVal)) {
+          select.value = currentVal;
+        }
+      });
+
+      renderFacetedPlantCheckboxes();
+    }
+
+    // Render Plant Checkboxes for Faceted Search (Page 3)
+    function renderFacetedPlantCheckboxes() {
+      const container = document.getElementById('facetedPlantCheckboxGroup');
+      if (!container) return;
+
+      let html = '';
+      appState.plants.forEach((plant, idx) => {
+        html += `
+          <label class="flex items-center gap-2 cursor-pointer hover:text-slate-900">
+            <input type="checkbox" value="${plant}" class="facet-plant-checkbox rounded text-upecGreen focus:ring-upecGreen" onchange="renderInventoryTable()" checked>
+            <span class="truncate">${plant}</span>
+          </label>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    // 4. PÁGINA 1: DASHBOARD GENERAL (METRICS & ALERTS RECALCULATION)
+    function updateDashboardMetrics() {
+      // 1. Total items
+      const totalItems = appState.inventory.length;
+      document.getElementById('dashTotalItems').innerText = totalItems;
+
+      // 2. Stock Zero count
+      const stockZeroItems = appState.inventory.filter(i => i.stock <= 0);
+      document.getElementById('dashStockZero').innerText = stockZeroItems.length;
+
+      // 3. Damaged/Inactive Equipment count
+      const damagedEquip = appState.equipment.filter(e => e.status === 'mantenimiento' || e.status === 'inactivo');
+      document.getElementById('dashEquipDamaged').innerText = damagedEquip.length;
+
+      // 4. Active Infrastructure Incidents count
+      document.getElementById('dashIncidentsActive').innerText = appState.incidents.length;
+
+      // Render Critical Alerts List
+      const alertsContainer = document.getElementById('dashCriticalAlertsList');
+      let alertsHtml = '';
+
+      // Check Expired Items
+      const expiredItems = appState.inventory.filter(i => i.expiry !== 'S/F' && i.expiry !== '' && i.expiry < SYSTEM_CURRENT_DATE);
+      
+      if (expiredItems.length === 0 && stockZeroItems.length === 0 && damagedEquip.length === 0 && appState.incidents.length === 0) {
+        alertsHtml = '<li class="p-4 text-center text-slate-400">No hay alertas críticas en el sistema. Todos los parámetros están normales.</li>';
+      } else {
+        // Render Expired Alert
+        expiredItems.forEach(item => {
+          alertsHtml += `
+            <li class="p-3.5 bg-red-50/50 hover:bg-red-50 flex items-start justify-between">
+              <div class="flex items-start space-x-3">
+                <div class="w-8 h-8 rounded bg-red-100 text-red-700 flex items-center justify-center font-bold text-xs mt-0.5">
+                  <i class="fa-solid fa-circle-xmark"></i>
+                </div>
+                <div>
+                  <div class="font-bold text-red-950">Insumo Caducado: ${item.name} (${item.plant})</div>
+                  <div class="text-slate-600 mt-0.5">Fecha de Vencimiento: <span class="font-mono font-bold text-red-700">${item.expiry}</span> (Superada respecto a Julio 2026).</div>
+                  <div class="text-[11px] text-red-800 font-semibold mt-1">Acción Requerida: Retirar de Bodega Central</div>
+                </div>
+              </div>
+              <span class="apex-badge-caducado">CADUCADO</span>
+            </li>
+          `;
+        });
+
+        // Render Stock 0 Alert
+        stockZeroItems.forEach(item => {
+          alertsHtml += `
+            <li class="p-3.5 bg-amber-50/50 hover:bg-amber-50 flex items-start justify-between">
+              <div class="flex items-start space-x-3">
+                <div class="w-8 h-8 rounded bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-xs mt-0.5">
+                  <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div>
+                  <div class="font-bold text-amber-950">Stock Agotado: ${item.name} (${item.plant})</div>
+                  <div class="text-slate-600 mt-0.5">Stock en Bodega: <span class="font-mono font-bold text-amber-900">0.00 ${item.unit}</span>.</div>
+                </div>
+              </div>
+              <span class="apex-badge-alert">Por comprar</span>
+            </li>
+          `;
+        });
+
+        // Render Damaged Equipment Alert
+        damagedEquip.forEach(eq => {
+          alertsHtml += `
+            <li class="p-3.5 hover:bg-slate-50 flex items-start justify-between">
+              <div class="flex items-start space-x-3">
+                <div class="w-8 h-8 rounded bg-slate-200 text-slate-800 flex items-center justify-center font-bold text-xs mt-0.5">
+                  <i class="fa-solid fa-screwdriver-wrench"></i>
+                </div>
+                <div>
+                  <div class="font-bold text-slate-900">Maquinaria en Falla: ${eq.name} (${eq.plant})</div>
+                  <div class="text-slate-600 mt-0.5">Daño / Motivo: <span class="italic text-slate-800">${eq.damageReason || 'Sin motivo especificado'}</span></div>
+                </div>
+              </div>
+              <span class="${eq.status === 'inactivo' ? 'apex-badge-caducado' : 'apex-badge-alert'}">${eq.status.toUpperCase()}</span>
+            </li>
+          `;
+        });
+      }
+
+      alertsContainer.innerHTML = alertsHtml;
+
+      // Render Dashboard Plants List
+      const plantsListContainer = document.getElementById('dashPlantsList');
+      let plantsHtml = '';
+      appState.plants.forEach(plant => {
+        const plantItemsCount = appState.inventory.filter(i => i.plant === plant).length;
+        plantsHtml += `
+          <div class="p-2 bg-slate-50 border border-slate-200 rounded flex items-center justify-between text-xs">
+            <span class="font-semibold text-slate-800">${plant}</span>
+            <span class="bg-slate-200 px-2 py-0.5 rounded text-slate-700 font-mono font-bold">${plantItemsCount} recursos</span>
+          </div>
+        `;
+      });
+      plantsListContainer.innerHTML = plantsHtml;
+    }
+
+    // 5. PÁGINA 2: CREATE PLANT & INFRASTRUCTURE INCIDENTS
+    function handleCreatePlant(e) {
+      e.preventDefault();
+      const input = document.getElementById('nombreNuevaPlanta');
+      const newPlantName = input.value.trim();
+
+      if (!newPlantName) return;
+
+      if (appState.plants.includes(newPlantName)) {
+        showToast('La planta ya existe en el sistema', 'warning');
+        return;
+      }
+
+      appState.plants.push(newPlantName);
+      input.value = '';
+      
+      updateAllPlantSelects();
+      renderEquipmentCards();
+      updateDispatchItemSelect();
+      updateDashboardMetrics();
+
+      showToast(`Nueva Planta "${newPlantName}" agregada con éxito`, 'success');
+    }
+
+    function handleReportIncident(e) {
+      e.preventDefault();
+      const plant = document.getElementById('incidenciaPlanta').value;
+      const type = document.getElementById('incidenciaTipo').value;
+      const details = document.getElementById('incidenciaDetalle').value.trim();
+
+      if (!details) return;
+
+      const newId = "INC-00" + (appState.incidents.length + 1);
+      appState.incidents.unshift({
+        id: newId,
+        plant: plant,
+        type: type,
+        details: details,
+        date: SYSTEM_CURRENT_DATE,
+        status: "Pendiente Decanato"
+      });
+
+      document.getElementById('incidenciaDetalle').value = '';
+      renderIncidentsTable();
+      updateDashboardMetrics();
+      showToast('Incidencia de infraestructura registrada', 'success');
+    }
+
+    function renderIncidentsTable() {
+      const tbody = document.querySelector('#tablaIncidencias tbody');
+      document.getElementById('incidentsCountDisplay').innerText = `${appState.incidents.length} registradas`;
+
+      if (appState.incidents.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-slate-400">No hay incidencias registradas.</td></tr>';
+        return;
+      }
+
+      let html = '';
+      appState.incidents.forEach(inc => {
+        html += `
+          <tr>
+            <td class="font-mono text-xs text-slate-500 font-bold">${inc.id}</td>
+            <td class="font-semibold text-slate-800">${inc.plant}</td>
+            <td><span class="px-2 py-0.5 bg-amber-50 text-amber-900 border border-amber-200 text-[11px] rounded font-semibold">${inc.type}</span></td>
+            <td class="text-slate-600">${inc.details}</td>
+            <td class="font-mono text-slate-500">${inc.date}</td>
+            <td><span class="apex-badge-alert"><i class="fa-solid fa-clock"></i> ${inc.status}</span></td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html;
+    }
+
+    // 6. PÁGINA 3: BODEGA CENTRAL (INTERACTIVE REPORT + FACETED SEARCH)
+    function renderInventoryTable() {
+      const tbody = document.querySelector('#tablaInventario tbody');
+      const searchVal = document.getElementById('irSearchInput').value.toLowerCase();
+
+      // Selected plant checkboxes
+      const selectedPlants = Array.from(document.querySelectorAll('.facet-plant-checkbox:checked')).map(cb => cb.value);
+      // Selected category checkboxes
+      const selectedCategories = Array.from(document.querySelectorAll('.facet-cat-checkbox:checked')).map(cb => cb.value);
+
+      let filtered = appState.inventory.filter(item => {
+        const matchPlant = selectedPlants.includes(item.plant);
+        const matchCat = selectedCategories.includes(item.category);
+        const matchSearch = item.name.toLowerCase().includes(searchVal) || item.id.toLowerCase().includes(searchVal);
+        return matchPlant && matchCat && matchSearch;
+      });
+
+      document.getElementById('irCountDisplay').innerText = `Mostrando ${filtered.length} de ${appState.inventory.length} items`;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-6 text-slate-400">No se encontraron ítems con los filtros seleccionados.</td></tr>';
+        return;
+      }
+
+      let html = '';
+      filtered.forEach(item => {
+        // Expiry check (< 2026-07-03)
+        let isExpired = false;
+        if (item.expiry !== 'S/F' && item.expiry !== '') {
+          if (item.expiry < SYSTEM_CURRENT_DATE) {
+            isExpired = true;
+          }
+        }
+
+        let isStockZero = item.stock <= 0;
+
+        // Badges
+        let badgeHtml = '';
+        if (isExpired) {
+          badgeHtml += '<span class="apex-badge-caducado"><i class="fa-solid fa-circle-xmark"></i> CADUCADO</span> ';
+        }
+        if (isStockZero) {
+          badgeHtml += '<span class="apex-badge-alert"><i class="fa-solid fa-triangle-exclamation"></i> Por comprar</span> ';
+        }
+        if (!isExpired && !isStockZero) {
+          badgeHtml += '<span class="apex-badge-ok"><i class="fa-solid fa-circle-check"></i> Disponible</span>';
+        }
+
+        html += `
+          <tr>
+            <td class="font-mono text-xs text-slate-500 font-bold">${item.id}</td>
+            <td class="text-xs text-slate-700 font-medium">${item.plant}</td>
+            <td class="font-bold text-slate-800">${item.name}</td>
+            <td class="text-right font-mono font-bold ${isStockZero ? 'text-red-600' : 'text-slate-800'}">${item.stock.toFixed(2)}</td>
+            <td class="text-slate-600">${item.unit}</td>
+            <td class="font-mono text-xs ${isExpired ? 'text-red-700 font-bold' : 'text-slate-600'}">${item.expiry}</td>
+            <td>${badgeHtml}</td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+    }
+
+    function filterInventoryTable() {
+      renderInventoryTable();
+    }
+
+    function resetFacetedFilters() {
+      document.querySelectorAll('.facet-plant-checkbox').forEach(cb => cb.checked = true);
+      document.querySelectorAll('.facet-cat-checkbox').forEach(cb => cb.checked = true);
+      document.getElementById('irSearchInput').value = '';
+      renderInventoryTable();
+    }
+
+    function openModalNewItem() {
+      document.getElementById('newItemModal').classList.remove('hidden');
+    }
+    function closeModalNewItem() {
+      document.getElementById('newItemModal').classList.add('hidden');
+    }
+    function handleCreateInventoryItem(e) {
+      e.preventDefault();
+      const plant = document.getElementById('newItemPlanta').value;
+      const category = document.getElementById('newItemCategoria').value;
+      const name = document.getElementById('newItemNombre').value.trim();
+      const stock = parseFloat(document.getElementById('newItemStock').value) || 0;
+      const unit = document.getElementById('newItemUnidad').value.trim();
+      const expiryInput = document.getElementById('newItemVencimiento').value;
+
+      const newId = "INV-" + Math.floor(100 + Math.random() * 900);
+      appState.inventory.unshift({
+        id: newId,
+        plant: plant,
+        category: category,
+        name: name,
+        stock: stock,
+        unit: unit,
+        expiry: expiryInput || 'S/F'
+      });
+
+      closeModalNewItem();
+      renderInventoryTable();
+      updateDispatchItemSelect();
+      updateDashboardMetrics();
+      showToast('Ítem guardado con éxito en Bodega Central', 'success');
+      e.target.reset();
+    }
+
+    // 7. PÁGINA 4: MAQUINARIA EN FINCA (CARDS REGION)
+    function renderEquipmentCards() {
+      const grid = document.getElementById('equipmentCardsGrid');
+      const plantFilter = document.getElementById('plantaCardFilter').value;
+
+      let filtered = appState.equipment.filter(eq => plantFilter === 'ALL' || eq.plant === plantFilter);
+      document.getElementById('equipmentCountDisplay').innerText = `${filtered.length} máquinas cargadas`;
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '<div class="col-span-full text-center py-8 text-slate-400 bg-white rounded border border-slate-200">No hay maquinaria registrada para esta planta.</div>';
+        return;
+      }
+
+      let html = '';
+      filtered.forEach(eq => {
+        const serialText = eq.serial ? eq.serial : '<span class="italic text-slate-400">Sin Etiqueta</span>';
+        
+        let statusBadge = '';
+        if (eq.status === 'operativo') {
+          statusBadge = '<span class="apex-badge-ok"><i class="fa-solid fa-circle text-[8px]"></i> Operativo</span>';
+        } else if (eq.status === 'mantenimiento') {
+          statusBadge = '<span class="apex-badge-alert"><i class="fa-solid fa-triangle-exclamation text-[8px]"></i> En Mantenimiento</span>';
+        } else if (eq.status === 'inactivo') {
+          statusBadge = '<span class="apex-badge-caducado"><i class="fa-solid fa-circle-xmark text-[8px]"></i> Inactivo por Daño</span>';
+        }
+
+        let damageBlock = '';
+        if ((eq.status === 'mantenimiento' || eq.status === 'inactivo') && eq.damageReason) {
+          damageBlock = `
+            <div class="mt-2 p-2 bg-amber-50 border border-amber-200 rounded text-[11px] text-amber-950 font-medium">
+              <span class="font-bold block text-amber-900"><i class="fa-solid fa-clipboard-question"></i> Daño Específico / Motivo:</span>
+              ${eq.damageReason}
+            </div>
+          `;
+        }
+
+        html += `
+          <div class="t-Region flex flex-col justify-between">
+            <div class="t-Region-header border-b border-slate-200 bg-slate-50">
+              <div class="t-Region-title text-sm">
+                <i class="fa-solid fa-gears text-upecGreen"></i>
+                <span>${eq.name}</span>
+              </div>
+            </div>
+            <div class="t-Region-body space-y-2 text-xs">
+              <div class="text-slate-500">Planta: <span class="font-semibold text-slate-800">${eq.plant}</span></div>
+              <div class="text-slate-500">Marca: <span class="font-semibold text-slate-800">${eq.brand}</span></div>
+              <div class="text-slate-500">Serie: <span class="font-semibold text-slate-800">${serialText}</span></div>
+              <div class="text-slate-500">Año Adquisición: <span class="font-semibold text-slate-800">${eq.year}</span></div>
+              <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
+                <span class="text-slate-500 font-medium">Estado Técnico:</span>
+                ${statusBadge}
+              </div>
+              ${damageBlock}
+            </div>
+            
+            <div class="p-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-1">
+              <button onclick="setEquipmentStatus('${eq.id}', 'operativo')" class="flex-1 py-1 text-[11px] font-bold ${eq.status === 'operativo' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-slate-200 text-slate-700 hover:bg-emerald-500 hover:text-white'} rounded transition-colors">
+                Operativo
+              </button>
+              <button onclick="setEquipmentStatus('${eq.id}', 'mantenimiento')" class="flex-1 py-1 text-[11px] font-bold ${eq.status === 'mantenimiento' ? 'bg-upecYellow text-slate-950 shadow-xs' : 'bg-slate-200 text-slate-700 hover:bg-amber-400 hover:text-slate-900'} rounded transition-colors">
+                Mantenimiento
+              </button>
+              <button onclick="setEquipmentStatus('${eq.id}', 'inactivo')" class="flex-1 py-1 text-[11px] font-bold ${eq.status === 'inactivo' ? 'bg-red-600 text-white shadow-xs' : 'bg-slate-200 text-slate-700 hover:bg-red-500 hover:text-white'} rounded transition-colors">
+                Inactivo
+              </button>
+            </div>
+          </div>
+        `;
+      });
+
+      grid.innerHTML = html;
+    }
+
+    function setEquipmentStatus(eqId, targetStatus) {
+      const eq = appState.equipment.find(e => e.id === eqId);
+      if (!eq) return;
+
+      if (targetStatus === 'operativo') {
+        eq.status = 'operativo';
+        eq.damageReason = '';
+        renderEquipmentCards();
+        updateDashboardMetrics();
+        showToast(`Maquinaria "${eq.name}" restablecida a OPERATIVO`, 'success');
+      } else {
+        document.getElementById('modalEquipmentId').value = eqId;
+        document.getElementById('modalTargetStatus').value = targetStatus;
+        document.getElementById('modalEquipmentName').innerText = `${eq.name} (${eq.plant})`;
+        document.getElementById('modalDamageText').value = eq.damageReason || '';
+        document.getElementById('damageModal').classList.remove('hidden');
+      }
+    }
+
+    function closeDamageModal() {
+      document.getElementById('damageModal').classList.add('hidden');
+    }
+
+    function handleSaveDamageReason(e) {
+      e.preventDefault();
+      const eqId = document.getElementById('modalEquipmentId').value;
+      const targetStatus = document.getElementById('modalTargetStatus').value;
+      const damageText = document.getElementById('modalDamageText').value.trim();
+
+      if (!damageText) {
+        showToast('Debe ingresar el daño específico o motivo.', 'warning');
+        return;
+      }
+
+      const eq = appState.equipment.find(e => e.id === eqId);
+      if (eq) {
+        eq.status = targetStatus;
+        eq.damageReason = damageText;
+        closeDamageModal();
+        renderEquipmentCards();
+        updateDashboardMetrics();
+        showToast(`Motivo guardado en bitácora para ${eq.name}`, 'warning');
+      }
+    }
+
+    // 8. PÁGINA 5: MÓDULO DE DESPACHOS TRANSACCIONALES
+    function updateDispatchItemSelect() {
+      const plantSelect = document.getElementById('despachoPlantaOrigen');
+      const itemSelect = document.getElementById('despachoItemSelect');
+      
+      if (!plantSelect || !itemSelect) return;
+
+      const selectedPlant = plantSelect.value;
+      const availableItems = appState.inventory.filter(i => i.plant === selectedPlant && i.stock > 0);
+
+      let html = '';
+      if (availableItems.length === 0) {
+        html = '<option value="">-- No hay ítems con stock en esta planta --</option>';
+      } else {
+        html = '<option value="">-- Seleccionar Ítem Disponible --</option>';
+        availableItems.forEach(i => {
+          html += `<option value="${i.id}">${i.name} (Stock: ${i.stock} ${i.unit})</option>`;
+        });
+      }
+      itemSelect.innerHTML = html;
+    }
+
+    function handleProcessDispatch(e) {
+      e.preventDefault();
+      const plant = document.getElementById('despachoPlantaOrigen').value;
+      const itemId = document.getElementById('despachoItemSelect').value;
+      const recipient = document.getElementById('despachoEstudiante').value.trim();
+      const technician = document.getElementById('despachoTecnico').value.trim();
+      const date = document.getElementById('despachoFecha').value;
+      const qty = parseFloat(document.getElementById('despachoCantidad').value) || 0;
+
+      if (!itemId || !recipient || !technician || qty <= 0) {
+        showToast('Complete todos los campos del despacho.', 'warning');
+        return;
+      }
+
+      const itemObj = appState.inventory.find(i => i.id === itemId);
+      if (!itemObj) return;
+
+      if (qty > itemObj.stock) {
+        showToast(`La cantidad supera el stock disponible (${itemObj.stock} ${itemObj.unit})`, 'danger');
+        return;
+      }
+
+      // Subtract stock in memory
+      itemObj.stock -= qty;
+
+      // Add dispatch record
+      const newDspId = "DSP-00" + (appState.dispatches.length + 1);
+      appState.dispatches.unshift({
+        id: newDspId,
+        plant: plant,
+        item: `${itemObj.name} (${qty} ${itemObj.unit})`,
+        qty: qty,
+        recipient: recipient,
+        technician: technician,
+        date: date
+      });
+
+      renderInventoryTable();
+      renderDispatchHistoryTable();
+      updateDispatchItemSelect();
+      updateDashboardMetrics();
+
+      showToast('Despacho procesado exitosamente y stock descontado', 'success');
+      document.getElementById('despachoEstudiante').value = '';
+      document.getElementById('despachoCantidad').value = '';
+    }
+
+    function renderDispatchHistoryTable() {
+      const tbody = document.querySelector('#tablaHistorialDespachos tbody');
+      document.getElementById('dispatchHistoryCount').innerText = `${appState.dispatches.length} despachos`;
+
+      if (appState.dispatches.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-slate-400">No se han registrado despachos.</td></tr>';
+        return;
+      }
+
+      let html = '';
+      appState.dispatches.forEach(d => {
+        html += `
+          <tr>
+            <td class="font-mono text-xs text-slate-500 font-bold">${d.id}</td>
+            <td class="font-semibold text-slate-800">${d.plant}</td>
+            <td class="font-bold text-upecGreen">${d.item}</td>
+            <td class="text-right font-mono font-bold text-slate-800">${d.qty.toFixed(2)}</td>
+            <td class="text-slate-700 font-medium">${d.recipient}</td>
+            <td class="text-slate-600">${d.technician}</td>
+            <td class="font-mono text-slate-500">${d.date}</td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html;
+    }
+
+    // TOAST NOTIFICATIONS UTILITY
+    function showToast(message, type = 'info') {
+      const toast = document.getElementById('toast');
+      const toastContent = document.getElementById('toastContent');
+      const toastIcon = document.getElementById('toastIcon');
+      const toastMessage = document.getElementById('toastMessage');
+
+      toastMessage.innerText = message;
+
+      if (type === 'success') {
+        toastContent.className = "px-4 py-3 rounded shadow-xl text-xs font-bold flex items-center gap-2.5 text-white bg-upecGreen border border-emerald-400";
+        toastIcon.className = "fa-solid fa-circle-check text-base text-upecYellow";
+      } else if (type === 'warning') {
+        toastContent.className = "px-4 py-3 rounded shadow-xl text-xs font-bold flex items-center gap-2.5 text-amber-950 bg-upecYellow border border-amber-500";
+        toastIcon.className = "fa-solid fa-triangle-exclamation text-base text-amber-900";
+      } else if (type === 'danger') {
+        toastContent.className = "px-4 py-3 rounded shadow-xl text-xs font-bold flex items-center gap-2.5 text-white bg-red-600 border border-red-400";
+        toastIcon.className = "fa-solid fa-circle-exclamation text-base text-white";
+      } else {
+        toastContent.className = "px-4 py-3 rounded shadow-xl text-xs font-bold flex items-center gap-2.5 text-white bg-slate-800 border border-slate-700";
+        toastIcon.className = "fa-solid fa-circle-info text-base text-sky-400";
+      }
+
+      toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+      
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+      }, 3500);
+    }
+  </script>
+</body>
+</html>
