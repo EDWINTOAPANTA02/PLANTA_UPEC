@@ -327,17 +327,17 @@
           <!-- APEX BADGE LIST - 4 METRIC CARDS EN TIEMPO REAL -->
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             
-            <!-- Badge 1: Total Ítems en Bodega -->
+            <!-- Badge 1: Fondo Rotativo -->
             <div class="t-Region p-4 border-l-4 border-l-upecGreen flex items-center justify-between">
               <div>
-                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Total Ítems en Bodega</div>
-                <div class="text-2xl font-bold text-slate-800 mt-1" id="dashTotalItems">0</div>
+                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Fondo Rotativo</div>
+                <div class="text-2xl font-bold text-slate-800 mt-1" id="dashFondoRotativo">$350.75</div>
                 <div class="text-[11px] text-emerald-600 font-medium mt-1 flex items-center gap-1">
-                  <i class="fa-solid fa-boxes-stacked"></i> Recursos e Insumos
+                  <i class="fa-solid fa-sack-dollar"></i> Saldo Disponible
                 </div>
               </div>
               <div class="w-11 h-11 rounded-full bg-emerald-50 text-upecGreen flex items-center justify-center text-lg border border-emerald-100">
-                <i class="fa-solid fa-cubes"></i>
+                <i class="fa-solid fa-wallet"></i>
               </div>
             </div>
 
@@ -613,6 +613,8 @@
                       <th>Nombre del Recurso</th>
                       <th class="text-right">Stock</th>
                       <th>Unidad</th>
+                      <th class="text-right">Costo Unitario</th>
+                      <th class="text-right">Precio Venta Sugerido</th>
                       <th>Vencimiento</th>
                       <th>Estado / Alerta</th>
                       <th>Detalles / Observaciones</th>
@@ -675,7 +677,7 @@
             <div class="t-Region-header border-l-4 border-l-upecGreen">
               <div class="t-Region-title">
                 <i class="fa-solid fa-truck-arrow-right text-upecGreen"></i>
-                <span>Formulario de Registro de Despacho Transaccional</span>
+                <span>Formulario de Registro de Operaciones y Ventas</span>
               </div>
             </div>
 
@@ -698,27 +700,36 @@
                   </select>
                 </div>
 
-                <!-- 3. Cantidad a Despachar -->
+                <!-- 3. Tipo de Operación -->
                 <div>
-                  <label class="apex-label" for="despachoCantidad">3. Cantidad a Despachar *</label>
+                  <label class="apex-label" for="despachoTipoOperacion">3. Tipo de Operación *</label>
+                  <select id="despachoTipoOperacion" required class="apex-input">
+                    <option value="Academico">Despacho Académico</option>
+                    <option value="Venta">Venta Pública</option>
+                  </select>
+                </div>
+
+                <!-- 4. Cantidad a Despachar -->
+                <div>
+                  <label class="apex-label" for="despachoCantidad">4. Cantidad a Despachar/Vender *</label>
                   <input type="number" step="0.01" min="0.01" id="despachoCantidad" required placeholder="0.00" class="apex-input font-mono">
                 </div>
 
-                <!-- 4. Estudiante / Destinatario -->
+                <!-- 5. Estudiante / Destinatario -->
                 <div>
-                  <label class="apex-label" for="despachoEstudiante">4. Estudiante / Destinatario (Nombre/Cédula) *</label>
+                  <label class="apex-label" for="despachoEstudiante">5. Estudiante / Destinatario (Nombre/Cédula) *</label>
                   <input type="text" id="despachoEstudiante" required placeholder="Ej: 0401829301 - Juan Pérez" class="apex-input">
                 </div>
 
-                <!-- 5. Técnico que Despacha -->
+                <!-- 6. Técnico que Despacha -->
                 <div>
-                  <label class="apex-label" for="despachoTecnico">5. Técnico que Despacha *</label>
+                  <label class="apex-label" for="despachoTecnico">6. Técnico / Responsable de Operación *</label>
                   <input type="text" id="despachoTecnico" required placeholder="Ej: Ing. Carlos Narváez (Técnico)" class="apex-input">
                 </div>
 
-                <!-- 6. Fecha de Despacho -->
+                <!-- 7. Fecha de Despacho -->
                 <div>
-                  <label class="apex-label" for="despachoFecha">6. Fecha de Despacho *</label>
+                  <label class="apex-label" for="despachoFecha">7. Fecha de Operación *</label>
                   <input type="date" id="despachoFecha" required value="2026-07-03" class="apex-input font-mono">
                 </div>
 
@@ -730,7 +741,7 @@
                 </button>
                 <button type="submit" class="px-5 py-2 bg-upecGreen hover:bg-upecGreenDark text-white text-xs font-bold rounded shadow-xs flex items-center gap-1.5">
                   <i class="fa-solid fa-check-double"></i>
-                  <span>Procesar Despacho (Descuenta Stock)</span>
+                  <span>Procesar Operación (APEX Commit)</span>
                 </button>
               </div>
             </form>
@@ -870,6 +881,18 @@
           </div>
         </div>
 
+        <!-- Fila Económica: Costo Unitario y Precio Venta Sugerido (2 col) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="apex-label" for="newItemCosto">Costo Unitario ($USD) *</label>
+            <input type="number" step="0.01" min="0" id="newItemCosto" required placeholder="0.00" class="apex-input font-mono">
+          </div>
+          <div>
+            <label class="apex-label" for="newItemPrecio">Precio Venta Sugerido ($USD) *</label>
+            <input type="number" step="0.01" min="0" id="newItemPrecio" required placeholder="0.00" class="apex-input font-mono">
+          </div>
+        </div>
+
         <!-- SECCIÓN DINÁMICA: INSUMO -->
         <div id="sectionInsumo" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
@@ -959,6 +982,7 @@
 
     // IN-MEMORY DATA STORE
     let appState = {
+      fondoRotativo: 350.75,
       plants: [
         "Planta Piloto de Cereales y Harinas",
         "Planta Piloto de Extracción de Almidón",
@@ -971,12 +995,12 @@
         { id: "INC-002", plant: "Planta Piloto de Procesamiento de Cárnicos", type: "Fallo Eléctrico / Luminarias", details: "Dos tubos LED quemados en la cámara de ahumado.", date: "2026-07-01", status: "En Revisión" }
       ],
       inventory: [
-        { id: "INV-101", plant: "Planta Piloto de Frutas y Vegetales", category: "Insumo", name: "Sacarosa Refinada Grado Alimenticio", stock: 120.00, unit: "Kg", expiry: "2026-12-15" },
-        { id: "INV-102", plant: "Planta Piloto de Procesamiento de Cárnicos", category: "Insumo", name: "Nitrito de Sodio 99%", stock: 0.00, unit: "Kg", expiry: "2027-08-10" },
-        { id: "INV-103", plant: "Planta Piloto de Cereales y Harinas", category: "Insumo", name: "Pectina Cítrica de Baja Metoxilación", stock: 15.00, unit: "Kg", expiry: "2025-05-10" }, // CADUCADO (< 2026-07-03)
-        { id: "INV-104", plant: "Planta Piloto de Frutas y Vegetales", category: "Material", name: "Envase Frasco Vidrio 500ml", stock: 450.00, unit: "Unidades", expiry: "S/F" },
-        { id: "INV-105", plant: "Planta Piloto de Extracción de Almidón", category: "Insumo", name: "Metabisulfito de Sodio USP", stock: 0.00, unit: "Kg", expiry: "2026-04-01" }, // CADUCADO + POR COMPRAR
-        { id: "INV-106", plant: "Planta Piloto de Cereales y Harinas", category: "Material", name: "Sacos de Papel Kraft 25kg", stock: 200.00, unit: "Unidades", expiry: "S/F" }
+        { id: "INV-101", plant: "Planta Piloto de Frutas y Vegetales", category: "Insumo", name: "Sacarosa Refinada Grado Alimenticio", stock: 120.00, unit: "Kg", expiry: "2026-12-15", cost: 1.20, price: 1.80, notes: "" },
+        { id: "INV-102", plant: "Planta Piloto de Procesamiento de Cárnicos", category: "Insumo", name: "Nitrito de Sodio 99%", stock: 0.00, unit: "Kg", expiry: "2027-08-10", cost: 15.00, price: 22.50, notes: "" },
+        { id: "INV-103", plant: "Planta Piloto de Cereales y Harinas", category: "Insumo", name: "Pectina Cítrica de Baja Metoxilación", stock: 15.00, unit: "Kg", expiry: "2025-05-10", cost: 8.50, price: 12.00, notes: "" }, // CADUCADO (< 2026-07-03)
+        { id: "INV-104", plant: "Planta Piloto de Frutas y Vegetales", category: "Material", name: "Envase Frasco Vidrio 500ml", stock: 450.00, unit: "Unidades", expiry: "S/F", cost: 0.35, price: 0.50, notes: "" },
+        { id: "INV-105", plant: "Planta Piloto de Extracción de Almidón", category: "Insumo", name: "Metabisulfito de Sodio USP", stock: 0.00, unit: "Kg", expiry: "2026-04-01", cost: 4.20, price: 6.50, notes: "" }, // CADUCADO + POR COMPRAR
+        { id: "INV-106", plant: "Planta Piloto de Cereales y Harinas", category: "Material", name: "Sacos de Papel Kraft 25kg", stock: 200.00, unit: "Unidades", expiry: "S/F", cost: 0.15, price: 0.25, notes: "" }
       ],
       equipment: [
         { id: "EQ-01", plant: "Planta Piloto de Cereales y Harinas", name: "Extrusora Doble Tornillo EX-10", brand: "Clextral France", serial: "SN-99401", year: "2021", status: "operativo", damageReason: "" },
@@ -1112,9 +1136,10 @@
 
     // 4. PÁGINA 1: DASHBOARD GENERAL (METRICS & ALERTS RECALCULATION)
     function updateDashboardMetrics() {
-      // 1. Total items
-      const totalItems = appState.inventory.length;
-      document.getElementById('dashTotalItems').innerText = totalItems;
+      // 1. Fondo Rotativo
+      if (document.getElementById('dashFondoRotativo')) {
+        document.getElementById('dashFondoRotativo').innerText = '$' + appState.fondoRotativo.toFixed(2);
+      }
 
       // 2. Stock Zero count
       const stockZeroItems = appState.inventory.filter(i => i.stock <= 0);
@@ -1303,7 +1328,7 @@
       document.getElementById('irCountDisplay').innerText = `Mostrando ${filtered.length} de ${appState.inventory.length} items`;
 
       if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center py-6 text-slate-400">No se encontraron ítems con los filtros seleccionados.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" class="text-center py-6 text-slate-400">No se encontraron ítems con los filtros seleccionados.</td></tr>';
         return;
       }
 
@@ -1338,6 +1363,8 @@
             <td class="font-bold text-slate-800">${item.name}</td>
             <td class="text-right font-mono font-bold ${isStockZero ? 'text-red-600' : 'text-slate-800'}">${item.stock.toFixed(2)}</td>
             <td class="text-slate-600">${item.unit}</td>
+            <td class="text-right font-mono font-medium text-slate-700">$${(item.cost || 0).toFixed(2)}</td>
+            <td class="text-right font-mono font-medium text-emerald-700">$${(item.price || 0).toFixed(2)}</td>
             <td class="font-mono text-xs ${isExpired ? 'text-red-700 font-bold' : 'text-slate-600'}">${item.expiry}</td>
             <td>${badgeHtml}</td>
             <td class="text-xs text-slate-500 font-medium">${item.notes || '-'}</td>
@@ -1424,6 +1451,8 @@
       const category = document.getElementById('newItemCategoria').value;
       const name = document.getElementById('newItemNombre').value.trim();
       const stock = parseFloat(document.getElementById('newItemStock').value) || 0;
+      const cost = parseFloat(document.getElementById('newItemCosto').value) || 0;
+      const price = parseFloat(document.getElementById('newItemPrecio').value) || 0;
       const observation = document.getElementById('newItemObservacion').value.trim();
 
       let unit = 'Unidades';
@@ -1480,6 +1509,8 @@
         stock: stock,
         unit: unit,
         expiry: expiry,
+        cost: cost,
+        price: price,
         notes: notes
       });
 
@@ -1637,6 +1668,7 @@
       e.preventDefault();
       const plant = document.getElementById('despachoPlantaOrigen').value;
       const itemId = document.getElementById('despachoItemSelect').value;
+      const opType = document.getElementById('despachoTipoOperacion').value;
       const recipient = document.getElementById('despachoEstudiante').value.trim();
       const technician = document.getElementById('despachoTecnico').value.trim();
       const date = document.getElementById('despachoFecha').value;
@@ -1658,12 +1690,21 @@
       // Subtract stock in memory
       itemObj.stock -= qty;
 
+      let transactionLabel = '';
+      if (opType === 'Venta') {
+        const totalVenta = qty * (itemObj.price || 0);
+        appState.fondoRotativo += totalVenta;
+        transactionLabel = ` [Venta Pública: $${totalVenta.toFixed(2)}]`;
+      } else {
+        transactionLabel = ' [Despacho Académico]';
+      }
+
       // Add dispatch record
       const newDspId = "DSP-00" + (appState.dispatches.length + 1);
       appState.dispatches.unshift({
         id: newDspId,
         plant: plant,
-        item: `${itemObj.name} (${qty} ${itemObj.unit})`,
+        item: `${itemObj.name} (${qty} ${itemObj.unit})${transactionLabel}`,
         qty: qty,
         recipient: recipient,
         technician: technician,
@@ -1675,7 +1716,11 @@
       updateDispatchItemSelect();
       updateDashboardMetrics();
 
-      showToast('Despacho procesado exitosamente y stock descontado', 'success');
+      if (opType === 'Venta') {
+        showToast(`Venta procesada exitosamente. Se sumaron $${(qty * (itemObj.price || 0)).toFixed(2)} al Fondo Rotativo.`, 'success');
+      } else {
+        showToast('Despacho académico procesado exitosamente y stock descontado', 'success');
+      }
       document.getElementById('despachoEstudiante').value = '';
       document.getElementById('despachoCantidad').value = '';
     }
