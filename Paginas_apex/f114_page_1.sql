@@ -138,7 +138,6 @@ wwv_flow_imp_page.create_page_plug(
 ,p_plug_display_point=>'BODY'
 ,p_plug_grid_column_span=>6
 ,p_plug_display_column=>1
-,p_plug_new_grid_row=>'Y'
 ,p_plug_source=>'<p class="text-xs text-slate-500 mt-2"><i class="fa fa-info-circle text-upecGreen"></i> Al presionar "Crear Planta", el motor JS/APEX registrará automáticamente la nueva planta piloto en los selectores.</p>'
 );
 
@@ -152,7 +151,6 @@ wwv_flow_imp_page.create_page_plug(
 ,p_plug_display_point=>'BODY'
 ,p_plug_grid_column_span=>6
 ,p_plug_display_column=>7
-,p_plug_new_grid_row=>'N'
 );
 
 -- Region: Reporte Incidencias
@@ -165,7 +163,6 @@ wwv_flow_imp_page.create_page_plug(
 ,p_plug_display_point=>'BODY'
 ,p_plug_grid_column_span=>12
 ,p_plug_display_column=>1
-,p_plug_new_grid_row=>'Y'
 ,p_plug_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
 'SELECT ',
 '    I.CODIGO AS ID,',
@@ -199,7 +196,6 @@ wwv_flow_imp_page.create_page_button(
 ,p_button_name=>'BTN_CREAR_PLANTA'
 ,p_button_action=>'SUBMIT'
 ,p_button_template_options=>'#DEFAULT#:t-Button--iconLeft'
-,p_button_template_id=>wwv_flow_imp.id(28886323117767063) -- standard button template id
 ,p_button_is_hot=>'Y'
 ,p_button_image_alt=>'Crear Planta (Inyección Global APEX)'
 ,p_button_position=>'CREATE'
@@ -214,7 +210,6 @@ wwv_flow_imp_page.create_page_button(
 ,p_button_name=>'BTN_GUARDAR_PROBLEMA'
 ,p_button_action=>'SUBMIT'
 ,p_button_template_options=>'#DEFAULT#:t-Button--iconLeft:btn-orange'
-,p_button_template_id=>wwv_flow_imp.id(28886323117767063)
 ,p_button_is_hot=>'Y'
 ,p_button_image_alt=>'Guardar Problema Físico'
 ,p_button_position=>'CREATE'
@@ -233,12 +228,9 @@ wwv_flow_imp_page.create_page_item(
 ,p_item_sequence=>10
 ,p_item_plug_id=>wwv_flow_imp.id(1140101000000002)
 ,p_prompt=>'Nombre de la Nueva Planta Piloto *'
-,p_placeholder=>'Ej: Planta Piloto de Lácteos y Quesos'
 ,p_display_as=>'NATIVE_TEXT_FIELD'
 ,p_cSize=>60
 ,p_cMaxlength=>250
-,p_is_required=>true
-,p_field_template=>wwv_flow_imp.id(288859345214870) -- standard required template
 );
 
 -- P1_CODIGO_PLANTA
@@ -252,8 +244,6 @@ wwv_flow_imp_page.create_page_item(
 ,p_lov=>'SELECT NOMBRE d, CODIGO r FROM PFI_TAB_PLANTAS WHERE ESTADO = ''ACTIVO'' ORDER BY NOMBRE'
 ,p_lov_display_null=>'YES'
 ,p_lov_null_text=>'- Seleccionar Planta -'
-,p_is_required=>true
-,p_field_template=>wwv_flow_imp.id(288859345214870)
 );
 
 -- P1_TIPO_FALLA
@@ -267,8 +257,6 @@ wwv_flow_imp_page.create_page_item(
 ,p_lov=>'STATIC:Goteras en Techo;Goteras en Techo,Fallo Eléctrico / Luminarias;Fallo Eléctrico / Luminarias,Pintura / Paredes;Pintura / Paredes,Otros;Otros'
 ,p_lov_display_null=>'YES'
 ,p_lov_null_text=>'- Seleccionar Falla -'
-,p_is_required=>true
-,p_field_template=>wwv_flow_imp.id(288859345214870)
 );
 
 -- P1_DETALLES
@@ -278,12 +266,9 @@ wwv_flow_imp_page.create_page_item(
 ,p_item_sequence=>30
 ,p_item_plug_id=>wwv_flow_imp.id(1140101000000003)
 ,p_prompt=>'Detalles u Observaciones del Problema *'
-,p_placeholder=>'Describa la afectación física o área inhabilitada...'
 ,p_display_as=>'NATIVE_TEXTAREA'
 ,p_cSize=>60
 ,p_cHeight=>4
-,p_is_required=>true
-,p_field_template=>wwv_flow_imp.id(288859345214870)
 );
 
 
