@@ -662,8 +662,35 @@
           </div>
 
           <!-- GRID DE TARJETAS COMPACTAS (APEX Cards Region) -->
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="equipmentCardsGrid">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 animate-fadeIn" id="equipmentCardsGrid">
             <!-- Dynamically populated via JS -->
+          </div>
+
+          <!-- REPORTE DE TRASLADO DE ACTIVOS (APEX Audit Table) -->
+          <div class="t-Region mt-6">
+            <div class="t-Region-header border-l-4 border-l-upecGreen">
+              <div class="t-Region-title">
+                <i class="fa-solid fa-clock-rotate-left text-upecGreen"></i>
+                <span>Historial de Traslado de Activos (Auditoría de Movimientos)</span>
+              </div>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="apex-table text-xs" id="tablaMovimientosActivos">
+                <thead>
+                  <tr>
+                    <th>Activo / Maquinaria</th>
+                    <th>Planta Origen</th>
+                    <th>Planta Destino</th>
+                    <th>Área / Sub-área Destino</th>
+                    <th>Fecha de Traslado</th>
+                    <th>Responsable Autorizado</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200">
+                  <!-- Dynamic JS content -->
+                </tbody>
+              </table>
+            </div>
           </div>
 
         </div>
@@ -695,7 +722,7 @@
                 <!-- 2. Seleccionar Ítem -->
                 <div>
                   <label class="apex-label" for="despachoItemSelect">2. Seleccionar Ítem de Bodega *</label>
-                  <select id="despachoItemSelect" required class="apex-input font-medium">
+                  <select id="despachoItemSelect" required class="apex-input font-medium" onchange="calculateLiveDispatchPrice()">
                     <!-- Populated dynamically based on plant selection -->
                   </select>
                 </div>
@@ -703,7 +730,7 @@
                 <!-- 3. Tipo de Operación -->
                 <div>
                   <label class="apex-label" for="despachoTipoOperacion">3. Tipo de Operación *</label>
-                  <select id="despachoTipoOperacion" required class="apex-input">
+                  <select id="despachoTipoOperacion" required class="apex-input" onchange="calculateLiveDispatchPrice()">
                     <option value="Academico">Despacho Académico</option>
                     <option value="Venta">Venta Pública</option>
                   </select>
@@ -712,7 +739,16 @@
                 <!-- 4. Cantidad a Despachar -->
                 <div>
                   <label class="apex-label" for="despachoCantidad">4. Cantidad a Despachar/Vender *</label>
-                  <input type="number" step="0.01" min="0.01" id="despachoCantidad" required placeholder="0.00" class="apex-input font-mono">
+                  <input type="number" step="0.01" min="0.01" id="despachoCantidad" required placeholder="0.00" class="apex-input font-mono" oninput="calculateLiveDispatchPrice()">
+                  
+                  <!-- APEX Style Info Alert for Live Calculation -->
+                  <div id="despachoCalculoAlerta" class="p-3 bg-blue-50 border border-blue-200 text-blue-900 rounded text-xs mt-2 hidden flex items-start gap-2">
+                    <i class="fa-solid fa-circle-info text-blue-600 mt-0.5"></i>
+                    <div>
+                      <span class="font-bold">Cálculo de Operación:</span>
+                      <span id="despachoCalculoTexto"></span>
+                    </div>
+                  </div>
                 </div>
 
                 <!-- 5. Estudiante / Destinatario -->
@@ -882,7 +918,7 @@
         </div>
 
         <!-- Fila Económica: Costo Unitario y Precio Venta Sugerido (2 col) -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div id="sectionEconomica" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="apex-label" for="newItemCosto">Costo Unitario ($USD) *</label>
             <input type="number" step="0.01" min="0" id="newItemCosto" required placeholder="0.00" class="apex-input font-mono">
@@ -915,6 +951,10 @@
         <!-- SECCIÓN DINÁMICA: EQUIPO -->
         <div id="sectionEquipo" class="grid grid-cols-1 sm:grid-cols-2 gap-4 hidden">
           <div>
+            <label class="apex-label" for="newItemCodigoInst">Código Institucional *</label>
+            <input type="text" id="newItemCodigoInst" placeholder="Ej: UPEC-EQ-01" class="apex-input">
+          </div>
+          <div>
             <label class="apex-label" for="newItemMarca">Marca *</label>
             <input type="text" id="newItemMarca" placeholder="Ej: Clextral France" class="apex-input">
           </div>
@@ -933,6 +973,17 @@
               <option value="mantenimiento">En Mantenimiento</option>
               <option value="inactivo">Inactivo por Daño</option>
             </select>
+          </div>
+          <div>
+            <label class="apex-label" for="newItemPerteneceProyecto">¿Pertenece a Proyecto de Investigación? *</label>
+            <select id="newItemPerteneceProyecto" class="apex-input" onchange="handleProyectoChange()">
+              <option value="No">No</option>
+              <option value="Si">Sí</option>
+            </select>
+          </div>
+          <div id="sectionResponsableProyecto" class="hidden sm:col-span-2">
+            <label class="apex-label" for="newItemResponsableProyecto">Responsable del Proyecto de Investigación *</label>
+            <input type="text" id="newItemResponsableProyecto" placeholder="Ej: Dr. Hugo Ruiz" class="apex-input">
           </div>
         </div>
 
@@ -959,6 +1010,58 @@
           </button>
           <button type="submit" class="px-4 py-1.5 bg-upecGreen hover:bg-upecGreenDark text-white text-xs font-bold rounded shadow-xs">
             Guardar Ítem
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 3: REGISTRAR TRASLADO DE EQUIPO -->
+  <div id="trasladoModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-md shadow-2xl w-full max-w-md border border-slate-300 overflow-hidden">
+      
+      <div class="bg-upecGreen text-white px-4 py-3 flex items-center justify-between">
+        <h3 class="font-bold text-sm flex items-center gap-2">
+          <i class="fa-solid fa-truck-ramp-box text-upecYellow"></i> Registrar Traslado de Activo
+        </h3>
+        <button onclick="closeTrasladoModal()" class="text-white hover:text-upecYellow">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleSaveTraslado(event)" id="trasladoForm" class="p-5 space-y-4">
+        <input type="hidden" id="trasladoEqId">
+        
+        <div>
+          <label class="apex-label">Activo Seleccionado</label>
+          <div id="trasladoEqNameDisplay" class="px-3 py-2 bg-slate-100 rounded text-xs font-bold text-slate-800 border border-slate-200">
+            -
+          </div>
+        </div>
+
+        <div>
+          <label class="apex-label" for="trasladoPlantaDestino">Planta Destino *</label>
+          <select id="trasladoPlantaDestino" required class="apex-input">
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+
+        <div>
+          <label class="apex-label" for="trasladoArea">Nueva Área / Sub-área *</label>
+          <input type="text" id="trasladoArea" required placeholder="Ej: Laboratorio de Cereales, Lácteos..." class="apex-input">
+        </div>
+
+        <div>
+          <label class="apex-label" for="trasladoResponsable">Responsable Autorizado *</label>
+          <input type="text" id="trasladoResponsable" required placeholder="Ej: Ing. Carlos Narváez" class="apex-input">
+        </div>
+
+        <div class="pt-3 border-t border-slate-200 flex items-center justify-end space-x-2">
+          <button type="button" onclick="closeTrasladoModal()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded border border-slate-300">
+            Cancelar
+          </button>
+          <button type="submit" class="px-4 py-1.5 bg-upecGreen hover:bg-upecGreenDark text-white text-xs font-bold rounded shadow-xs">
+            Confirmar Traslado
           </button>
         </div>
       </form>
@@ -1003,15 +1106,18 @@
         { id: "INV-106", plant: "Planta Piloto de Cereales y Harinas", category: "Material", name: "Sacos de Papel Kraft 25kg", stock: 200.00, unit: "Unidades", expiry: "S/F", cost: 0.15, price: 0.25, notes: "" }
       ],
       equipment: [
-        { id: "EQ-01", plant: "Planta Piloto de Cereales y Harinas", name: "Extrusora Doble Tornillo EX-10", brand: "Clextral France", serial: "SN-99401", year: "2021", status: "operativo", damageReason: "" },
-        { id: "EQ-02", plant: "Planta Piloto de Extracción de Almidón", name: "Centrífuga Industrial Decanter CD-200", brand: "Alfa Laval", serial: "SN-AL8830", year: "2019", status: "operativo", damageReason: "" },
-        { id: "EQ-03", plant: "Planta Piloto de Frutas y Vegetales", name: "Marmita Volcable a Vapor 100L", brand: "InoxProcess", serial: "SN-MAR-100", year: "2020", status: "mantenimiento", damageReason: "Fuga de vapor en válvula de seguridad principal." },
-        { id: "EQ-04", plant: "Planta Piloto de Procesamiento de Cárnicos", name: "Embutidora Hidráulica EH-30", brand: "Mainca Spain", serial: "SN-EH30-88", year: "2018", status: "inactivo", damageReason: "Fallo en motor hidráulico principal. Requiere bobinado." },
-        { id: "EQ-05", plant: "Planta Piloto de Procesamiento de Cárnicos", name: "Cámara de Maduración y Ahumado", brand: "Fessmann", serial: "SN-FM-2022", year: "2022", status: "operativo", damageReason: "" },
-        { id: "EQ-06", plant: "Planta Piloto de Frutas y Vegetales", name: "Liofilizador de Alimentos LIO-5", brand: "Labconco", serial: "", year: "2023", status: "operativo", damageReason: "" }
+        { id: "EQ-01", plant: "Planta Piloto de Cereales y Harinas", name: "Extrusora Doble Tornillo EX-10", brand: "Clextral France", serial: "SN-99401", year: "2021", status: "operativo", damageReason: "", codigoInst: "UPEC-EQ-01", perteneceProyecto: "No", responsableProyecto: "" },
+        { id: "EQ-02", plant: "Planta Piloto de Extracción de Almidón", name: "Centrífuga Industrial Decanter CD-200", brand: "Alfa Laval", serial: "SN-AL8830", year: "2019", status: "operativo", damageReason: "", codigoInst: "UPEC-EQ-02", perteneceProyecto: "No", responsableProyecto: "" },
+        { id: "EQ-03", plant: "Planta Piloto de Frutas y Vegetales", name: "Marmita Volcable a Vapor 100L", brand: "InoxProcess", serial: "SN-MAR-100", year: "2020", status: "mantenimiento", damageReason: "Fuga de vapor en válvula de seguridad principal.", codigoInst: "UPEC-EQ-03", perteneceProyecto: "Si", responsableProyecto: "Dr. Hugo Ruiz" },
+        { id: "EQ-04", plant: "Planta Piloto de Procesamiento de Cárnicos", name: "Embutidora Hidráulica EH-30", brand: "Mainca Spain", serial: "SN-EH30-88", year: "2018", status: "inactivo", damageReason: "Fallo en motor hidráulico principal. Requiere bobinado.", codigoInst: "UPEC-EQ-04", perteneceProyecto: "No", responsableProyecto: "" },
+        { id: "EQ-05", plant: "Planta Piloto de Procesamiento de Cárnicos", name: "Cámara de Maduración y Ahumado", brand: "Fessmann", serial: "SN-FM-2022", year: "2022", status: "operativo", damageReason: "", codigoInst: "UPEC-EQ-05", perteneceProyecto: "Si", responsableProyecto: "Msc. Elena Tapia" },
+        { id: "EQ-06", plant: "Planta Piloto de Frutas y Vegetales", name: "Liofilizador de Alimentos LIO-5", brand: "Labconco", serial: "", year: "2023", status: "operativo", damageReason: "", codigoInst: "UPEC-EQ-06", perteneceProyecto: "No", responsableProyecto: "" }
       ],
       dispatches: [
-        { id: "DSP-001", plant: "Planta Piloto de Frutas y Vegetales", item: "Sacarosa Refinada Grado Alimenticio", qty: 25.00, recipient: "0401829301 - Carlos Benavides", technician: "Ing. Carlos Narváez", date: "2026-07-02" }
+        { id: "DSP-001", plant: "Planta Piloto de Frutas y Vegetales", item: "Sacarosa Refinada Grado Alimenticio (25.00 Kg) [Despacho Académico]", qty: 25.00, recipient: "0401829301 - Carlos Benavides", technician: "Ing. Carlos Narváez", date: "2026-07-02" }
+      ],
+      movements: [
+        { id: "MOV-001", eqName: "Marmita Volcable a Vapor 100L", origin: "Planta Piloto de Frutas y Vegetales", dest: "Planta Piloto de Procesamiento de Cárnicos", area: "Área de Cocción y Ahumado", date: "2026-07-02", technician: "Ing. Carlos Narváez" }
       ]
     };
 
@@ -1025,6 +1131,7 @@
       renderDispatchHistoryTable();
       updateDispatchItemSelect();
       updateDashboardMetrics();
+      renderMovementsTable();
     });
 
     // 1. TOGGLE SIDEBAR MENU
@@ -1363,8 +1470,8 @@
             <td class="font-bold text-slate-800">${item.name}</td>
             <td class="text-right font-mono font-bold ${isStockZero ? 'text-red-600' : 'text-slate-800'}">${item.stock.toFixed(2)}</td>
             <td class="text-slate-600">${item.unit}</td>
-            <td class="text-right font-mono font-medium text-slate-700">$${(item.cost || 0).toFixed(2)}</td>
-            <td class="text-right font-mono font-medium text-emerald-700">$${(item.price || 0).toFixed(2)}</td>
+            <td class="text-right font-mono font-medium text-slate-700">${item.category === 'Material' ? '-' : '$' + (item.cost || 0).toFixed(2)}</td>
+            <td class="text-right font-mono font-medium text-emerald-700">${item.category === 'Material' ? '-' : '$' + (item.price || 0).toFixed(2)}</td>
             <td class="font-mono text-xs ${isExpired ? 'text-red-700 font-bold' : 'text-slate-600'}">${item.expiry}</td>
             <td>${badgeHtml}</td>
             <td class="text-xs text-slate-500 font-medium">${item.notes || '-'}</td>
@@ -1402,6 +1509,7 @@
       const secInsumo = document.getElementById('sectionInsumo');
       const secEquipo = document.getElementById('sectionEquipo');
       const secMaterial = document.getElementById('sectionMaterial');
+      const sectionEco = document.getElementById('sectionEconomica');
 
       // Hide all dynamic sections first
       secInsumo.classList.add('hidden');
@@ -1410,10 +1518,12 @@
 
       // Reset conditionally required attributes
       document.getElementById('newItemUnidad').required = false;
+      document.getElementById('newItemCodigoInst').required = false;
       document.getElementById('newItemMarca').required = false;
       document.getElementById('newItemAnio').required = false;
       document.getElementById('newItemEstadoEquipo').required = false;
       document.getElementById('newItemEstadoMaterial').required = false;
+      document.getElementById('newItemResponsableProyecto').required = false;
 
       // Clear hidden values
       if (category !== 'Insumo') {
@@ -1421,13 +1531,30 @@
         document.getElementById('newItemVencimiento').value = '';
       }
       if (category !== 'Equipo') {
+        document.getElementById('newItemCodigoInst').value = '';
         document.getElementById('newItemMarca').value = '';
         document.getElementById('newItemSerie').value = '';
         document.getElementById('newItemAnio').value = '';
         document.getElementById('newItemEstadoEquipo').value = 'operativo';
+        document.getElementById('newItemPerteneceProyecto').value = 'No';
+        document.getElementById('newItemResponsableProyecto').value = '';
+        document.getElementById('sectionResponsableProyecto').classList.add('hidden');
       }
       if (category !== 'Material') {
         document.getElementById('newItemEstadoMaterial').value = 'Buen estado';
+      }
+
+      // Economic fields visibility based on category
+      if (category === 'Material') {
+        sectionEco.classList.add('hidden');
+        document.getElementById('newItemCosto').required = false;
+        document.getElementById('newItemPrecio').required = false;
+        document.getElementById('newItemCosto').value = '';
+        document.getElementById('newItemPrecio').value = '';
+      } else {
+        sectionEco.classList.remove('hidden');
+        document.getElementById('newItemCosto').required = true;
+        document.getElementById('newItemPrecio').required = true;
       }
 
       // Show the selected section and set required fields
@@ -1436,9 +1563,11 @@
         document.getElementById('newItemUnidad').required = true;
       } else if (category === 'Equipo') {
         secEquipo.classList.remove('hidden');
+        document.getElementById('newItemCodigoInst').required = true;
         document.getElementById('newItemMarca').required = true;
         document.getElementById('newItemAnio').required = true;
         document.getElementById('newItemEstadoEquipo').required = true;
+        handleProyectoChange(); // Sync project responsible field required/visibility
       } else if (category === 'Material') {
         secMaterial.classList.remove('hidden');
         document.getElementById('newItemEstadoMaterial').required = true;
@@ -1451,8 +1580,8 @@
       const category = document.getElementById('newItemCategoria').value;
       const name = document.getElementById('newItemNombre').value.trim();
       const stock = parseFloat(document.getElementById('newItemStock').value) || 0;
-      const cost = parseFloat(document.getElementById('newItemCosto').value) || 0;
-      const price = parseFloat(document.getElementById('newItemPrecio').value) || 0;
+      const cost = category === 'Material' ? 0 : (parseFloat(document.getElementById('newItemCosto').value) || 0);
+      const price = category === 'Material' ? 0 : (parseFloat(document.getElementById('newItemPrecio').value) || 0);
       const observation = document.getElementById('newItemObservacion').value.trim();
 
       let unit = 'Unidades';
@@ -1466,31 +1595,42 @@
         expiry = vencimiento || 'S/F';
         notes = observation;
       } else if (category === 'Equipo') {
+        const codigoInst = document.getElementById('newItemCodigoInst').value.trim();
         const marca = document.getElementById('newItemMarca').value.trim();
         const serie = document.getElementById('newItemSerie').value.trim();
         const anio = document.getElementById('newItemAnio').value.trim();
         const estado = document.getElementById('newItemEstadoEquipo').value;
+        const perteneceProyecto = document.getElementById('newItemPerteneceProyecto').value;
+        const responsableProyecto = document.getElementById('newItemResponsableProyecto').value.trim();
 
-        if (!marca || !anio) {
+        if (!codigoInst || !marca || !anio) {
           showToast('Por favor completa todos los campos requeridos para Equipo', 'warning');
+          return;
+        }
+        if (perteneceProyecto === 'Si' && !responsableProyecto) {
+          showToast('Por favor especifica el responsable del proyecto', 'warning');
           return;
         }
 
         unit = 'Unidades';
         expiry = 'S/F';
         const serialText = serie ? serie : 'Sin Etiqueta';
-        notes = `Marca: ${marca} | Serie: ${serialText} | Año: ${anio} | Estado: ${estado.toUpperCase()}${observation ? ' | Obs: ' + observation : ''}`;
+        const proyText = perteneceProyecto === 'Si' ? ` | Proyecto Inv: Sí (Resp: ${responsableProyecto})` : ' | Proyecto Inv: No';
+        notes = `Cod: ${codigoInst} | Marca: ${marca} | Serie: ${serialText} | Año: ${anio}${proyText} | Estado: ${estado.toUpperCase()}${observation ? ' | Obs: ' + observation : ''}`;
 
-        // Dynamic Action: Inject new machinery directly into the Cards Region
+        // Inject new machinery directly into the Cards Region
         const newEqId = "EQ-0" + (appState.equipment.length + 1);
         appState.equipment.unshift({
           id: newEqId,
           plant: plant,
           name: name,
+          codigoInst: codigoInst,
           brand: marca,
           serial: serie,
           year: anio,
           status: estado,
+          perteneceProyecto: perteneceProyecto,
+          responsableProyecto: responsableProyecto,
           damageReason: estado !== 'operativo' ? 'Daño inicial reportado al registrar.' : ''
         });
       } else if (category === 'Material') {
@@ -1559,19 +1699,33 @@
           `;
         }
 
+        let projectBlock = '';
+        if (eq.perteneceProyecto === 'Si' && eq.responsableProyecto) {
+          projectBlock = `
+            <div class="mt-1.5 inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200 font-bold text-[10px]">
+              <i class="fa-solid fa-microscope"></i>
+              <span>Inv: ${eq.responsableProyecto}</span>
+            </div>
+          `;
+        }
+
+        const codigoInstText = eq.codigoInst ? eq.codigoInst : 'N/A';
+
         html += `
           <div class="t-Region flex flex-col justify-between">
-            <div class="t-Region-header border-b border-slate-200 bg-slate-50">
-              <div class="t-Region-title text-sm">
+            <div class="t-Region-header border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+              <div class="t-Region-title text-sm flex items-center gap-1.5">
                 <i class="fa-solid fa-gears text-upecGreen"></i>
-                <span>${eq.name}</span>
+                <span class="font-bold text-slate-900">${eq.name}</span>
               </div>
+              <span class="text-[10px] font-mono font-bold bg-slate-200 text-slate-800 px-1.5 py-0.5 rounded border border-slate-300 shadow-xs">${codigoInstText}</span>
             </div>
             <div class="t-Region-body space-y-2 text-xs">
               <div class="text-slate-500">Planta: <span class="font-semibold text-slate-800">${eq.plant}</span></div>
               <div class="text-slate-500">Marca: <span class="font-semibold text-slate-800">${eq.brand}</span></div>
               <div class="text-slate-500">Serie: <span class="font-semibold text-slate-800">${serialText}</span></div>
               <div class="text-slate-500">Año Adquisición: <span class="font-semibold text-slate-800">${eq.year}</span></div>
+              ${projectBlock}
               <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
                 <span class="text-slate-500 font-medium">Estado Técnico:</span>
                 ${statusBadge}
@@ -1579,15 +1733,21 @@
               ${damageBlock}
             </div>
             
-            <div class="p-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-1">
-              <button onclick="setEquipmentStatus('${eq.id}', 'operativo')" class="flex-1 py-1 text-[11px] font-bold ${eq.status === 'operativo' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-slate-200 text-slate-700 hover:bg-emerald-500 hover:text-white'} rounded transition-colors">
-                Operativo
-              </button>
-              <button onclick="setEquipmentStatus('${eq.id}', 'mantenimiento')" class="flex-1 py-1 text-[11px] font-bold ${eq.status === 'mantenimiento' ? 'bg-upecYellow text-slate-950 shadow-xs' : 'bg-slate-200 text-slate-700 hover:bg-amber-400 hover:text-slate-900'} rounded transition-colors">
-                Mantenimiento
-              </button>
-              <button onclick="setEquipmentStatus('${eq.id}', 'inactivo')" class="flex-1 py-1 text-[11px] font-bold ${eq.status === 'inactivo' ? 'bg-red-600 text-white shadow-xs' : 'bg-slate-200 text-slate-700 hover:bg-red-500 hover:text-white'} rounded transition-colors">
-                Inactivo
+            <div class="p-3 bg-slate-50 border-t border-slate-200 flex flex-col gap-2">
+              <div class="flex items-center justify-between gap-1">
+                <button onclick="setEquipmentStatus('${eq.id}', 'operativo')" class="flex-1 py-1 text-[11px] font-bold ${eq.status === 'operativo' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-slate-200 text-slate-700 hover:bg-emerald-500 hover:text-white'} rounded transition-colors">
+                  Operativo
+                </button>
+                <button onclick="setEquipmentStatus('${eq.id}', 'mantenimiento')" class="flex-1 py-1 text-[11px] font-bold ${eq.status === 'mantenimiento' ? 'bg-upecYellow text-slate-950 shadow-xs' : 'bg-slate-200 text-slate-700 hover:bg-amber-400 hover:text-slate-900'} rounded transition-colors">
+                  Mantenimiento
+                </button>
+                <button onclick="setEquipmentStatus('${eq.id}', 'inactivo')" class="flex-1 py-1 text-[11px] font-bold ${eq.status === 'inactivo' ? 'bg-red-600 text-white shadow-xs' : 'bg-slate-200 text-slate-700 hover:bg-red-500 hover:text-white'} rounded transition-colors">
+                  Inactivo
+                </button>
+              </div>
+              <button onclick="openTrasladoModal('${eq.id}')" class="w-full py-1 bg-slate-100 hover:bg-upecGreen hover:text-white text-slate-700 text-[11px] font-bold rounded border border-slate-300 transition-colors flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-truck-ramp-box"></i>
+                <span>Registrar Traslado</span>
               </button>
             </div>
           </div>
@@ -1662,6 +1822,130 @@
         });
       }
       itemSelect.innerHTML = html;
+      calculateLiveDispatchPrice();
+    }
+
+    // Project Field control for Equipo
+    function handleProyectoChange() {
+      const pertenece = document.getElementById('newItemPerteneceProyecto').value;
+      const container = document.getElementById('sectionResponsableProyecto');
+      const input = document.getElementById('newItemResponsableProyecto');
+      
+      if (pertenece === 'Si') {
+        container.classList.remove('hidden');
+        input.required = true;
+      } else {
+        container.classList.add('hidden');
+        input.required = false;
+        input.value = '';
+      }
+    }
+
+    // Activo movement/traslado logic
+    function openTrasladoModal(eqId) {
+      const eq = appState.equipment.find(e => e.id === eqId);
+      if (!eq) return;
+      
+      document.getElementById('trasladoEqId').value = eqId;
+      document.getElementById('trasladoEqNameDisplay').innerText = `${eq.name} (${eq.codigoInst || eq.id})`;
+      
+      const destSelect = document.getElementById('trasladoPlantaDestino');
+      let html = '';
+      appState.plants.forEach(plant => {
+        html += `<option value="${plant}" ${plant === eq.plant ? 'selected' : ''}>${plant}</option>`;
+      });
+      destSelect.innerHTML = html;
+      
+      document.getElementById('trasladoArea').value = '';
+      document.getElementById('trasladoResponsable').value = '';
+      
+      document.getElementById('trasladoModal').classList.remove('hidden');
+    }
+
+    function closeTrasladoModal() {
+      document.getElementById('trasladoModal').classList.add('hidden');
+    }
+
+    function handleSaveTraslado(e) {
+      e.preventDefault();
+      const eqId = document.getElementById('trasladoEqId').value;
+      const targetPlant = document.getElementById('trasladoPlantaDestino').value;
+      const targetArea = document.getElementById('trasladoArea').value.trim();
+      const responsible = document.getElementById('trasladoResponsable').value.trim();
+
+      const eq = appState.equipment.find(e => e.id === eqId);
+      if (!eq) return;
+
+      const originPlant = eq.plant;
+      eq.plant = targetPlant;
+
+      const newMovId = "MOV-00" + (appState.movements.length + 1);
+      appState.movements.unshift({
+        id: newMovId,
+        eqName: eq.name,
+        origin: originPlant,
+        dest: targetPlant,
+        area: targetArea,
+        date: SYSTEM_CURRENT_DATE,
+        technician: responsible
+      });
+
+      closeTrasladoModal();
+      renderEquipmentCards();
+      renderMovementsTable();
+      showToast(`Traslado registrado y planta actualizada para ${eq.name}`, 'success');
+    }
+
+    function renderMovementsTable() {
+      const tbody = document.querySelector('#tablaMovimientosActivos tbody');
+      if (!tbody) return;
+
+      if (!appState.movements || appState.movements.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-slate-400">No hay registros de traslados.</td></tr>';
+        return;
+      }
+
+      let html = '';
+      appState.movements.forEach(m => {
+        html += `
+          <tr>
+            <td class="font-bold text-slate-800">${m.eqName}</td>
+            <td class="text-slate-600">${m.origin}</td>
+            <td class="font-semibold text-upecGreen">${m.dest}</td>
+            <td class="font-mono text-slate-700">${m.area}</td>
+            <td class="font-mono text-slate-500">${m.date}</td>
+            <td class="text-slate-700 font-medium">${m.technician}</td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html;
+    }
+
+    // Live Calculation in dispatch
+    function calculateLiveDispatchPrice() {
+      const selectElem = document.getElementById('despachoItemSelect');
+      const qtyElem = document.getElementById('despachoCantidad');
+      const typeElem = document.getElementById('despachoTipoOperacion');
+      const alertElem = document.getElementById('despachoCalculoAlerta');
+      const textElem = document.getElementById('despachoCalculoTexto');
+
+      if (!selectElem || !qtyElem || !typeElem || !alertElem || !textElem) return;
+
+      const itemId = selectElem.value;
+      const qty = parseFloat(qtyElem.value) || 0;
+      const opType = typeElem.value;
+
+      if (opType === 'Venta' && itemId && qty > 0) {
+        const item = appState.inventory.find(i => i.id === itemId);
+        if (item && item.category !== 'Material') {
+          const price = item.price || 0;
+          const total = qty * price;
+          textElem.innerText = ` ${qty.toFixed(2)} ${item.unit} x $${price.toFixed(2)} = $${total.toFixed(2)} USD`;
+          alertElem.classList.remove('hidden');
+          return;
+        }
+      }
+      alertElem.classList.add('hidden');
     }
 
     function handleProcessDispatch(e) {
@@ -1723,6 +2007,7 @@
       }
       document.getElementById('despachoEstudiante').value = '';
       document.getElementById('despachoCantidad').value = '';
+      calculateLiveDispatchPrice();
     }
 
     function renderDispatchHistoryTable() {
