@@ -689,126 +689,145 @@
                 <tbody class="divide-y divide-slate-200">
                   <!-- Dynamic JS content -->
                 </tbody>
+              </tabl        <!-- ================= PÁGINA 5: MÓDULO DE FORMULACIÓN Y DESPACHOS DE PRODUCCIÓN (BOM) ================= -->
+        <div id="page-despachos" class="tab-content hidden space-y-6">
+
+          <!-- REQUERIMIENTO UI 1: PANTALLA DEL ESTUDIANTE (FORMULACIÓN DINÁMICA) -->
+          <div class="t-Region">
+            <div class="t-Region-header border-l-4 border-l-upecGreen">
+              <div class="t-Region-title">
+                <i class="fa-solid fa-flask text-upecGreen"></i>
+                <span>Formulario A: Configuración y Formulación Dinámica de Producción (BOM Estudiante)</span>
+              </div>
+              <span class="text-xs text-slate-500 font-mono">Motor de Cálculo BOM APEX</span>
+            </div>
+
+            <div class="t-Region-body space-y-5">
+              
+              <!-- Cabecera de Formulación (4 Controles) -->
+              <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-50 p-4 rounded border border-slate-200">
+                <!-- 1. Producto a Elaborar -->
+                <div>
+                  <label class="apex-label" for="formProductSelect">1. Producto a Elaborar *</label>
+                  <select id="formProductSelect" onchange="calculateFormulaBOM()" class="apex-input font-bold text-slate-800">
+                    <option value="FORM-CHORIZO">Chorizo Picante Barrica del Diablo (2.08 Kg Base)</option>
+                  </select>
+                </div>
+
+                <!-- 2. Kilos a Producir -->
+                <div>
+                  <label class="apex-label" for="formKilosInput">2. Kilos a Producir (Kg) *</label>
+                  <input type="number" step="0.01" min="0.1" id="formKilosInput" value="2.08" oninput="calculateFormulaBOM()" required class="apex-input font-mono font-bold text-upecGreen">
+                </div>
+
+                <!-- 3. Estudiante / Solicitante -->
+                <div>
+                  <label class="apex-label" for="formStudentInput">3. Estudiante / Solicitante *</label>
+                  <input type="text" id="formStudentInput" value="0401928374 - María José Guamán" required placeholder="Ej: 0401829301 - Juan Pérez" class="apex-input">
+                </div>
+
+                <!-- 4. Botón Calcular Formulación -->
+                <div class="flex items-end">
+                  <button type="button" onclick="calculateFormulaBOM()" class="w-full px-4 py-2 bg-upecGreen hover:bg-upecGreenDark text-white text-xs font-bold rounded shadow-xs flex items-center justify-center gap-2 transition-colors">
+                    <i class="fa-solid fa-calculator text-upecYellow"></i>
+                    <span>Calcular Formulación</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Detalle Interactive Grid (Tabla de Insumos Calculados) -->
+              <div class="space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-3 bg-white border-b border-slate-200 pb-2">
+                  <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-table-cells text-upecGreen"></i>
+                    <h4 class="font-bold text-xs uppercase tracking-wider text-slate-700">Detalle de Insumos y Receta Calculada (Interactive Grid)</h4>
+                  </div>
+                  
+                  <!-- Botón Añadir Ingrediente Extra -->
+                  <button type="button" onclick="openAddExtraIngredientModal()" class="px-3 py-1.5 bg-slate-100 hover:bg-upecYellow hover:text-amber-950 text-slate-700 text-xs font-bold rounded border border-slate-300 transition-colors flex items-center gap-1.5">
+                    <i class="fa-solid fa-plus-circle text-upecGreen"></i>
+                    <span>Añadir Ingrediente Extra / Insumo Libre</span>
+                  </button>
+                </div>
+
+                <!-- Tabla de Receta Interactiva -->
+                <div class="overflow-x-auto">
+                  <table class="apex-table text-xs" id="tablaDetalleFormulacion">
+                    <thead>
+                      <tr>
+                        <th class="w-16">ID</th>
+                        <th>Ingrediente / Insumo</th>
+                        <th>Tipo de Regla (Cálculo BOM)</th>
+                        <th class="text-right">Stock en Bodega</th>
+                        <th class="text-right">Cant. Calculada (Teórica)</th>
+                        <th class="text-right w-44">Gramos / Cant. a Usar (Editable)</th>
+                        <th>Unidad</th>
+                        <th class="text-center w-16">Acción</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200">
+                      <!-- Dynamic JS content -->
+                    </tbody>
+                    <tfoot class="bg-slate-50 font-bold border-t-2 border-slate-300">
+                      <tr>
+                        <td colspan="4" class="text-right uppercase text-slate-600">Total Masa Insumos Principales:</td>
+                        <td id="totalTeoricoDisplay" class="text-right font-mono text-slate-700">0.00 g</td>
+                        <td id="totalEditableDisplay" class="text-right font-mono text-upecGreen">0.00 g</td>
+                        <td colspan="2" class="text-xs text-slate-500 font-normal italic">(Pre-embutido)</td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+
+                <!-- Envío de Solicitud -->
+                <div class="pt-3 border-t border-slate-200 flex items-center justify-between">
+                  <div class="text-xs text-slate-500 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-info text-upecGreen"></i>
+                    <span>Modifique los gramajes si requiere experimentación y presione "Enviar Solicitud a Bodega Central".</span>
+                  </div>
+                  <button type="button" onclick="handleSendProductionRequest()" class="px-5 py-2 bg-upecGreen hover:bg-upecGreenDark text-white text-xs font-bold rounded shadow-xs flex items-center gap-2">
+                    <i class="fa-solid fa-paper-plane text-upecYellow"></i>
+                    <span>Enviar Solicitud a Bodega Central</span>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+
+          <!-- REQUERIMIENTO UI 2: PANEL DEL BODEGUERO CENTRAL (APROBACIÓN) -->
+          <div class="t-Region">
+            <div class="t-Region-header border-l-4 border-l-upecYellow">
+              <div class="t-Region-title">
+                <i class="fa-solid fa-boxes-packing text-upecGreen"></i>
+                <span>Cola de Despachos de Bodega (Solicitudes de Producción Pendientes / Histórico)</span>
+              </div>
+              <span class="text-xs text-slate-500 font-mono" id="solicitudesCountDisplay">0 solicitudes</span>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="apex-table" id="tablaSolicitudesProduccion">
+                <thead>
+                  <tr>
+                    <th class="w-20">ID</th>
+                    <th>Producto a Elaborar</th>
+                    <th class="text-right">Kilos (Kg)</th>
+                    <th>Estudiante / Solicitante</th>
+                    <th>Fecha Solicitud</th>
+                    <th class="text-center">Total Items</th>
+                    <th>Estado</th>
+                    <th class="text-center">Acciones Bodega</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200">
+                  <!-- Dynamic JS content -->
+                </tbody>
               </table>
             </div>
           </div>
 
-        </div>
-
-
-        <!-- ================= PÁGINA 5: MÓDULO DE DESPACHOS TRANSACCIONALES ================= -->
-        <div id="page-despachos" class="tab-content hidden space-y-6">
-
-          <!-- FORMULARIO DE CAPTURA EN 2 COLUMNAS -->
-          <div class="t-Region">
-            <div class="t-Region-header border-l-4 border-l-upecGreen">
-              <div class="t-Region-title">
-                <i class="fa-solid fa-truck-arrow-right text-upecGreen"></i>
-                <span>Formulario de Registro de Operaciones y Ventas</span>
-              </div>
-            </div>
-
-            <form onsubmit="handleProcessDispatch(event)" class="t-Region-body space-y-4">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                
-                <!-- 1. Planta Origen -->
-                <div>
-                  <label class="apex-label" for="despachoPlantaOrigen">1. Planta Piloto Origen *</label>
-                  <select id="despachoPlantaOrigen" onchange="updateDispatchItemSelect()" required class="apex-input plant-select-global">
-                    <!-- Dynamic select -->
-                  </select>
-                </div>
-
-                <!-- 2. Seleccionar Ítem -->
-                <div>
-                  <label class="apex-label" for="despachoItemSelect">2. Seleccionar Ítem de Bodega *</label>
-                  <select id="despachoItemSelect" required class="apex-input font-medium" onchange="calculateLiveDispatchPrice()">
-                    <!-- Populated dynamically based on plant selection -->
-                  </select>
-                </div>
-
-                <!-- 3. Tipo de Operación -->
-                <div>
-                  <label class="apex-label" for="despachoTipoOperacion">3. Tipo de Operación *</label>
-                  <select id="despachoTipoOperacion" required class="apex-input" onchange="calculateLiveDispatchPrice()">
-                    <option value="Academico">Despacho Académico</option>
-                    <option value="Venta">Venta Pública</option>
-                  </select>
-                </div>
-
-                <!-- 4. Cantidad a Despachar -->
-                <div>
-                  <label class="apex-label" for="despachoCantidad">4. Cantidad a Despachar/Vender *</label>
-                  <input type="number" step="0.01" min="0.01" id="despachoCantidad" required placeholder="0.00" class="apex-input font-mono" oninput="calculateLiveDispatchPrice()">
-                  
-                  <!-- APEX Style Info Alert for Live Calculation -->
-                  <div id="despachoCalculoAlerta" class="p-3 bg-blue-50 border border-blue-200 text-blue-900 rounded text-xs mt-2 hidden flex items-start gap-2">
-                    <i class="fa-solid fa-circle-info text-blue-600 mt-0.5"></i>
-                    <div>
-                      <span class="font-bold">Cálculo de Operación:</span>
-                      <span id="despachoCalculoTexto"></span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- 5. Estudiante / Destinatario -->
-                <div>
-                  <label class="apex-label" for="despachoEstudiante">5. Estudiante / Destinatario (Nombre/Cédula) *</label>
-                  <input type="text" id="despachoEstudiante" required placeholder="Ej: 0401829301 - Juan Pérez" class="apex-input">
-                </div>
-
-                <!-- 6. Técnico que Despacha -->
-                <div>
-                  <label class="apex-label" for="despachoTecnico">6. Técnico / Responsable de Operación *</label>
-                  <input type="text" id="despachoTecnico" required placeholder="Ej: Ing. Carlos Narváez (Técnico)" class="apex-input">
-                </div>
-
-                <!-- 7. Fecha de Despacho -->
-                <div>
-                  <label class="apex-label" for="despachoFecha">7. Fecha de Operación *</label>
-                  <input type="date" id="despachoFecha" required value="2026-07-03" class="apex-input font-mono">
-                </div>
-
-              </div>
-
-              <div class="pt-3 border-t border-slate-200 flex items-center justify-end space-x-2">
-                <button type="reset" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded border border-slate-300">
-                  Limpiar Formulario
-                </button>
-                <button type="submit" class="px-5 py-2 bg-upecGreen hover:bg-upecGreenDark text-white text-xs font-bold rounded shadow-xs flex items-center gap-1.5">
-                  <i class="fa-solid fa-check-double"></i>
-                  <span>Procesar Operación (APEX Commit)</span>
-                </button>
-              </div>
-            </form>
-          </div>
-
-          <!-- HISTORIAL DE DESPACHOS RECIENTES (PARTE INFERIOR MISMA PÁGINA) -->
-          <div class="t-Region">
-            <div class="t-Region-header">
-              <div class="t-Region-title">
-                <i class="fa-solid fa-clock-rotate-left text-upecGreen"></i>
-                <span>Historial de Despachos Recientes</span>
-              </div>
-              <span class="text-xs text-slate-500 font-mono" id="dispatchHistoryCount">0 despachos</span>
-            </div>
-
-            <div class="overflow-x-auto">
-              <table class="apex-table" id="tablaHistorialDespachos">
-                <thead>
-                  <tr>
-                    <th class="w-16">ID</th>
-                    <th>Planta Origen</th>
-                    <th>Elemento Despachado</th>
-                    <th class="text-right">Cantidad</th>
-                    <th>Estudiante / Destinatario</th>
-                    <th>Técnico que Despacha</th>
-                    <th>Fecha Despacho</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-200">
-                  <!-- Dynamically populated -->
-                </tbody>
+        </div>dy>
               </table>
             </div>
           </div>
@@ -1069,6 +1088,109 @@
   </div>
 
 
+  <!-- MODAL 4: AÑADIR INGREDIENTE EXTRA / INSUMO LIBRE -->
+  <div id="addExtraIngredientModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-md shadow-2xl w-full max-w-md border border-slate-300 overflow-hidden">
+      <div class="bg-upecGreen text-white px-4 py-3 flex items-center justify-between">
+        <h3 class="font-bold text-sm flex items-center gap-2">
+          <i class="fa-solid fa-plus-circle text-upecYellow"></i> Añadir Ingrediente Extra a la Receta
+        </h3>
+        <button type="button" onclick="closeAddExtraIngredientModal()" class="text-white hover:text-upecYellow">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleAddExtraIngredient(event)" class="p-5 space-y-4">
+        <div>
+          <label class="apex-label" for="extraItemSelect">Seleccionar Insumo/Material de Bodega Central *</label>
+          <select id="extraItemSelect" required class="apex-input font-medium text-slate-800">
+            <!-- Dynamic items -->
+          </select>
+        </div>
+
+        <div>
+          <label class="apex-label" for="extraQtyInput">Cantidad / Gramos a Agregar *</label>
+          <input type="number" step="0.01" min="0.01" id="extraQtyInput" required placeholder="Ej: 50.00" class="apex-input font-mono">
+        </div>
+
+        <div class="pt-3 border-t border-slate-200 flex items-center justify-end space-x-2">
+          <button type="button" onclick="closeAddExtraIngredientModal()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded border border-slate-300">
+            Cancelar
+          </button>
+          <button type="submit" class="px-4 py-1.5 bg-upecGreen hover:bg-upecGreenDark text-white text-xs font-bold rounded shadow-xs">
+            Agregar a Receta
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- MODAL 5: DETALLE Y APROBACIÓN DE SOLICITUD DE BODEGA -->
+  <div id="viewRequestModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-md shadow-2xl w-full max-w-2xl border border-slate-300 overflow-hidden">
+      <div class="bg-upecGreen text-white px-4 py-3 flex items-center justify-between">
+        <h3 class="font-bold text-sm flex items-center gap-2">
+          <i class="fa-solid fa-clipboard-check text-upecYellow"></i> <span id="viewRequestTitle">Detalle de Solicitud de Producción</span>
+        </h3>
+        <button type="button" onclick="closeViewRequestModal()" class="text-white hover:text-upecYellow">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="p-5 space-y-4">
+        <!-- Metadata Header -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-3 rounded border border-slate-200 text-xs">
+          <div>
+            <span class="text-slate-500 block font-medium">Solicitante:</span>
+            <span id="viewReqApplicant" class="font-bold text-slate-800"></span>
+          </div>
+          <div>
+            <span class="text-slate-500 block font-medium">Producto:</span>
+            <span id="viewReqProduct" class="font-bold text-upecGreen"></span>
+          </div>
+          <div>
+            <span class="text-slate-500 block font-medium">Kilos:</span>
+            <span id="viewReqKilos" class="font-bold font-mono text-slate-800"></span>
+          </div>
+          <div>
+            <span class="text-slate-500 block font-medium">Estado:</span>
+            <span id="viewReqStatus"></span>
+          </div>
+        </div>
+
+        <!-- Ingredients Table -->
+        <div class="max-h-60 overflow-y-auto">
+          <table class="apex-table text-xs" id="tablaDetalleViewRequest">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Insumo / Material</th>
+                <th class="text-right">Cant. Requerida</th>
+                <th>Unidad</th>
+                <th class="text-right">Stock Disponible</th>
+                <th>Estado Stock</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200">
+              <!-- Dynamic JS content -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pt-3 border-t border-slate-200 flex items-center justify-between">
+          <button type="button" onclick="closeViewRequestModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded border border-slate-300">
+            Cerrar
+          </button>
+          <div id="viewRequestActionButtons">
+            <!-- Dynamic button -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
   <!-- TOAST NOTIFICATIONS UTILITY -->
   <div id="toast" class="fixed bottom-5 right-5 z-50 transform transition-all duration-300 translate-y-20 opacity-0 pointer-events-none">
     <div id="toastContent" class="px-4 py-3 rounded shadow-xl text-xs font-semibold flex items-center gap-2.5 text-white bg-slate-800 border border-slate-700">
@@ -1103,7 +1225,76 @@
         { id: "INV-103", plant: "Planta Piloto de Cereales y Harinas", category: "Insumo", name: "Pectina Cítrica de Baja Metoxilación", stock: 15.00, unit: "Kg", expiry: "2025-05-10", cost: 8.50, price: 12.00, notes: "" }, // CADUCADO (< 2026-07-03)
         { id: "INV-104", plant: "Planta Piloto de Frutas y Vegetales", category: "Material", name: "Envase Frasco Vidrio 500ml", stock: 450.00, unit: "Unidades", expiry: "S/F", cost: 0.35, price: 0.50, notes: "" },
         { id: "INV-105", plant: "Planta Piloto de Extracción de Almidón", category: "Insumo", name: "Metabisulfito de Sodio USP", stock: 0.00, unit: "Kg", expiry: "2026-04-01", cost: 4.20, price: 6.50, notes: "" }, // CADUCADO + POR COMPRAR
-        { id: "INV-106", plant: "Planta Piloto de Cereales y Harinas", category: "Material", name: "Sacos de Papel Kraft 25kg", stock: 200.00, unit: "Unidades", expiry: "S/F", cost: 0.15, price: 0.25, notes: "" }
+        { id: "INV-106", plant: "Planta Piloto de Cereales y Harinas", category: "Material", name: "Sacos de Papel Kraft 25kg", stock: 200.00, unit: "Unidades", expiry: "S/F", cost: 0.15, price: 0.25, notes: "" },
+        // INSUMOS Y MATERIALES RECETA CHORIZO PICANTE BARRICA DEL DIABLO
+        { id: "INV-107", plant: "Planta Piloto de Procesamiento de Cárnicos", category: "Insumo", name: "Carne de Pollo", stock: 5000.00, unit: "g", expiry: "2026-10-15", cost: 0.005, price: 0.008, notes: "Base Muestra Receta Chorizo" },
+        { id: "INV-108", plant: "Planta Piloto de Procesamiento de Cárnicos", category: "Insumo", name: "Grasa de Cerdo / Tocino", stock: 5000.00, unit: "g", expiry: "2026-10-15", cost: 0.004, price: 0.006, notes: "Aporte lipídico embutido" },
+        { id: "INV-109", plant: "Planta Piloto de Procesamiento de Cárnicos", category: "Insumo", name: "Cerveza Barrica del Diablo", stock: 5000.00, unit: "g", expiry: "2026-11-20", cost: 0.003, price: 0.005, notes: "Líquido saborizante artesanal" },
+        { id: "INV-110", plant: "Planta Piloto de Procesamiento de Cárnicos", category: "Insumo", name: "Tripolifosfato de Sodio", stock: 5000.00, unit: "g", expiry: "2027-01-01", cost: 0.010, price: 0.015, notes: "Retentor de humedad" },
+        { id: "INV-111", plant: "Planta Piloto de Procesamiento de Cárnicos", category: "Insumo", name: "Sal Común", stock: 5000.00, unit: "g", expiry: "S/F", cost: 0.001, price: 0.002, notes: "Sazonador base" },
+        { id: "INV-112", plant: "Planta Piloto de Procesamiento de Cárnicos", category: "Insumo", name: "Sal de Cura", stock: 5000.00, unit: "g", expiry: "2027-05-10", cost: 0.012, price: 0.018, notes: "Conservante nitritado" },
+        { id: "INV-113", plant: "Planta Piloto de Procesamiento de Cárnicos", category: "Insumo", name: "Ajo en Polvo", stock: 5000.00, unit: "g", expiry: "2026-12-01", cost: 0.008, price: 0.012, notes: "Condimento" },
+        { id: "INV-114", plant: "Planta Piloto de Procesamiento de Cárnicos", category: "Insumo", name: "Pimienta Negra Molida", stock: 5000.00, unit: "g", expiry: "2026-12-01", cost: 0.015, price: 0.022, notes: "Condimento picante" },
+        { id: "INV-115", plant: "Planta Piloto de Procesamiento de Cárnicos", category: "Insumo", name: "Ají en Polvo / Picante", stock: 5000.00, unit: "g", expiry: "2026-12-01", cost: 0.010, price: 0.015, notes: "Condimento característico Barrica" },
+        { id: "INV-116", plant: "Planta Piloto de Procesamiento de Cárnicos", category: "Insumo", name: "Paprika Molida", stock: 5000.00, unit: "g", expiry: "2026-12-01", cost: 0.009, price: 0.014, notes: "Colorante natural" },
+        { id: "INV-117", plant: "Planta Piloto de Procesamiento de Cárnicos", category: "Insumo", name: "Cebolla en Polvo", stock: 5000.00, unit: "g", expiry: "2026-12-01", cost: 0.007, price: 0.011, notes: "Condimento" },
+        { id: "INV-118", plant: "Planta Piloto de Procesamiento de Cárnicos", category: "Insumo", name: "Azúcar Blanco", stock: 5000.00, unit: "g", expiry: "2027-06-30", cost: 0.002, price: 0.003, notes: "Balanceador de sabor" },
+        { id: "INV-119", plant: "Planta Piloto de Procesamiento de Cárnicos", category: "Insumo", name: "Orégano Seco", stock: 5000.00, unit: "g", expiry: "2026-12-01", cost: 0.012, price: 0.018, notes: "Hierba aromática" },
+        { id: "INV-120", plant: "Planta Piloto de Procesamiento de Cárnicos", category: "Material", name: "Fundas para Embutido", stock: 500.00, unit: "Unidades", expiry: "S/F", cost: 0, price: 0, notes: "Envoltura de tripa" },
+        { id: "INV-121", plant: "Planta Piloto de Procesamiento de Cárnicos", category: "Material", name: "Hilo de Amarrar", stock: 500.00, unit: "Unidades", expiry: "S/F", cost: 0, price: 0, notes: "Atado de embutido" }
+      ],
+      formulas: [
+        {
+          id: "FORM-CHORIZO",
+          productName: "Chorizo Picante Barrica del Diablo",
+          baseBatchKg: 2.08,
+          plant: "Planta Piloto de Procesamiento de Cárnicos",
+          ingredients: [
+            { itemId: "INV-107", name: "Carne de Pollo", type: "BASE_MAESTRA", val: 1361, unit: "g" },
+            { itemId: "INV-108", name: "Grasa de Cerdo / Tocino", type: "PCT_SOBRE_BASE", val: 27.61, unit: "g" },
+            { itemId: "INV-109", name: "Cerveza Barrica del Diablo", type: "PCT_SOBRE_CARNICO", val: 20.25, unit: "g" },
+            { itemId: "INV-110", name: "Tripolifosfato de Sodio", type: "GRAMOS_POR_KG_TOTAL", val: 0.3, unit: "g" },
+            { itemId: "INV-111", name: "Sal Común", type: "GRAMOS_POR_KG_TOTAL", val: 10.32, unit: "g" },
+            { itemId: "INV-112", name: "Sal de Cura", type: "GRAMOS_POR_KG_TOTAL", val: 0.74, unit: "g" },
+            { itemId: "INV-113", name: "Ajo en Polvo", type: "GRAMOS_POR_KG_TOTAL", val: 4.12, unit: "g" },
+            { itemId: "INV-114", name: "Pimienta Negra Molida", type: "GRAMOS_POR_KG_TOTAL", val: 4.12, unit: "g" },
+            { itemId: "INV-115", name: "Ají en Polvo / Picante", type: "GRAMOS_POR_KG_TOTAL", val: 2.0, unit: "g" },
+            { itemId: "INV-116", name: "Paprika Molida", type: "GRAMOS_POR_KG_TOTAL", val: 7.23, unit: "g" },
+            { itemId: "INV-117", name: "Cebolla en Polvo", type: "GRAMOS_POR_KG_TOTAL", val: 2.06, unit: "g" },
+            { itemId: "INV-118", name: "Azúcar Blanco", type: "GRAMOS_POR_KG_TOTAL", val: 12.0, unit: "g" },
+            { itemId: "INV-119", name: "Orégano Seco", type: "GRAMOS_POR_KG_TOTAL", val: 1.55, unit: "g" },
+            { itemId: "INV-120", name: "Fundas para Embutido", type: "CANTIDAD_FIJA", val: 4, unit: "Unidades" },
+            { itemId: "INV-121", name: "Hilo de Amarrar", type: "CANTIDAD_FIJA", val: 5, unit: "Unidades" }
+          ]
+        }
+      ],
+      solicitudesProduccion: [
+        {
+          id: "SOL-001",
+          productName: "Chorizo Picante Barrica del Diablo",
+          kilosToProduce: 2.08,
+          applicant: "0401928374 - María José Guamán",
+          plant: "Planta Piloto de Procesamiento de Cárnicos",
+          date: "2026-07-03",
+          status: "PENDIENTE",
+          items: [
+            { itemId: "INV-107", name: "Carne de Pollo", calculatedQty: 1361, qtyToUse: 1361, unit: "g", typeRule: "BASE_MAESTRA" },
+            { itemId: "INV-108", name: "Grasa de Cerdo / Tocino", calculatedQty: 375.77, qtyToUse: 375.77, unit: "g", typeRule: "PCT_SOBRE_BASE" },
+            { itemId: "INV-109", name: "Cerveza Barrica del Diablo", calculatedQty: 351.70, qtyToUse: 351.70, unit: "g", typeRule: "PCT_SOBRE_CARNICO" },
+            { itemId: "INV-110", name: "Tripolifosfato de Sodio", calculatedQty: 0.62, qtyToUse: 0.62, unit: "g", typeRule: "GRAMOS_POR_KG_TOTAL" },
+            { itemId: "INV-111", name: "Sal Común", calculatedQty: 21.47, qtyToUse: 21.47, unit: "g", typeRule: "GRAMOS_POR_KG_TOTAL" },
+            { itemId: "INV-112", name: "Sal de Cura", calculatedQty: 1.54, qtyToUse: 1.54, unit: "g", typeRule: "GRAMOS_POR_KG_TOTAL" },
+            { itemId: "INV-113", name: "Ajo en Polvo", calculatedQty: 8.57, qtyToUse: 8.57, unit: "g", typeRule: "GRAMOS_POR_KG_TOTAL" },
+            { itemId: "INV-114", name: "Pimienta Negra Molida", calculatedQty: 8.57, qtyToUse: 8.57, unit: "g", typeRule: "GRAMOS_POR_KG_TOTAL" },
+            { itemId: "INV-115", name: "Ají en Polvo / Picante", calculatedQty: 4.16, qtyToUse: 4.16, unit: "g", typeRule: "GRAMOS_POR_KG_TOTAL" },
+            { itemId: "INV-116", name: "Paprika Molida", calculatedQty: 15.04, qtyToUse: 15.04, unit: "g", typeRule: "GRAMOS_POR_KG_TOTAL" },
+            { itemId: "INV-117", name: "Cebolla en Polvo", calculatedQty: 4.28, qtyToUse: 4.28, unit: "g", typeRule: "GRAMOS_POR_KG_TOTAL" },
+            { itemId: "INV-118", name: "Azúcar Blanco", calculatedQty: 24.96, qtyToUse: 24.96, unit: "g", typeRule: "GRAMOS_POR_KG_TOTAL" },
+            { itemId: "INV-119", name: "Orégano Seco", calculatedQty: 3.22, qtyToUse: 3.22, unit: "g", typeRule: "GRAMOS_POR_KG_TOTAL" },
+            { itemId: "INV-120", name: "Fundas para Embutido", calculatedQty: 4, qtyToUse: 4, unit: "Unidades", typeRule: "CANTIDAD_FIJA" },
+            { itemId: "INV-121", name: "Hilo de Amarrar", calculatedQty: 5, qtyToUse: 5, unit: "Unidades", typeRule: "CANTIDAD_FIJA" }
+          ]
+        }
       ],
       equipment: [
         { id: "EQ-01", plant: "Planta Piloto de Cereales y Harinas", name: "Extrusora Doble Tornillo EX-10", brand: "Clextral France", serial: "SN-99401", year: "2021", status: "operativo", damageReason: "", codigoInst: "UPEC-EQ-01", perteneceProyecto: "No", responsableProyecto: "" },
@@ -1121,6 +1312,9 @@
       ]
     };
 
+    // ACTIVE FORMULATION CALCULATED LINES (INTERACTIVE GRID STATE)
+    let activeFormulationLines = [];
+
     // INITIALIZATION
     document.addEventListener("DOMContentLoaded", function() {
       updateAllPlantSelects();
@@ -1132,6 +1326,8 @@
       updateDispatchItemSelect();
       updateDashboardMetrics();
       renderMovementsTable();
+      calculateFormulaBOM();
+      renderProductionRequestsTable();
     });
 
     // 1. TOGGLE SIDEBAR MENU
@@ -1802,27 +1998,418 @@
       }
     }
 
-    // 8. PÁGINA 5: MÓDULO DE DESPACHOS TRANSACCIONALES
-    function updateDispatchItemSelect() {
-      const plantSelect = document.getElementById('despachoPlantaOrigen');
-      const itemSelect = document.getElementById('despachoItemSelect');
+    // 8. PÁGINA 5: MÓDULO DE FORMULACIÓN DINÁMICA DE PRODUCCIÓN (BOM) Y APROBACIÓN DE BODEGA
+    
+    // Cálculo principal del Motor BOM según reglas exactas
+    function calculateFormulaBOM() {
+      const formulaSelect = document.getElementById('formProductSelect');
+      const kilosInput = document.getElementById('formKilosInput');
       
-      if (!plantSelect || !itemSelect) return;
+      if (!formulaSelect || !kilosInput) return;
 
-      const selectedPlant = plantSelect.value;
-      const availableItems = appState.inventory.filter(i => i.plant === selectedPlant && i.stock > 0);
+      const formulaId = formulaSelect.value;
+      const kilosToProduce = parseFloat(kilosInput.value) || 2.08;
+
+      const formulaObj = appState.formulas.find(f => f.id === formulaId);
+      if (!formulaObj) return;
+
+      // Base Batch: 2.08 Kg
+      const baseBatch = formulaObj.baseBatchKg || 2.08;
+      const scaleFactor = kilosToProduce / baseBatch;
+
+      // 1. CARNE DE POLLO (BASE_MAESTRA)
+      const carneBaseObj = formulaObj.ingredients.find(i => i.type === 'BASE_MAESTRA');
+      const carneGramosBase = carneBaseObj ? carneBaseObj.val : 1361;
+      const scaledCarne = carneGramosBase * scaleFactor;
+
+      // 2. GRASA (PCT_SOBRE_BASE) -> 27.61% de la carne
+      const grasaObj = formulaObj.ingredients.find(i => i.type === 'PCT_SOBRE_BASE');
+      const grasaPct = grasaObj ? grasaObj.val : 27.61;
+      const scaledGrasa = scaledCarne * (grasaPct / 100);
+
+      // 3. CERVEZA (PCT_SOBRE_CARNICO) -> 20.25% de (Carne + Grasa)
+      const cervezaObj = formulaObj.ingredients.find(i => i.type === 'PCT_SOBRE_CARNICO');
+      const cervezaPct = cervezaObj ? cervezaObj.val : 20.25;
+      const scaledCerveza = (scaledCarne + scaledGrasa) * (cervezaPct / 100);
+
+      // Generar líneas calculadas
+      activeFormulationLines = formulaObj.ingredients.map(ing => {
+        let calcQty = 0;
+        let ruleLabel = '';
+
+        if (ing.type === 'BASE_MAESTRA') {
+          calcQty = scaledCarne;
+          ruleLabel = `Base Maestra (${ing.val}g / 2.08Kg)`;
+        } else if (ing.type === 'PCT_SOBRE_BASE') {
+          calcQty = scaledGrasa;
+          ruleLabel = `${ing.val}% sobre Carne`;
+        } else if (ing.type === 'PCT_SOBRE_CARNICO') {
+          calcQty = scaledCerveza;
+          ruleLabel = `${ing.val}% sobre Cárnico (Carne+Grasa)`;
+        } else if (ing.type === 'GRAMOS_POR_KG_TOTAL') {
+          calcQty = ing.val * kilosToProduce;
+          ruleLabel = `${ing.val} g por Kg Total`;
+        } else if (ing.type === 'CANTIDAD_FIJA') {
+          calcQty = Math.round(ing.val * scaleFactor);
+          ruleLabel = `Cantidad Fija (${ing.val} unid / 2.08Kg)`;
+        }
+
+        // Search stock in Bodega Central
+        const invItem = appState.inventory.find(i => i.id === ing.itemId || i.name.toLowerCase() === ing.name.toLowerCase());
+        const stockAvail = invItem ? invItem.stock : 0;
+        const actualItemId = invItem ? invItem.id : ing.itemId;
+
+        return {
+          itemId: actualItemId,
+          name: ing.name,
+          typeRule: ruleLabel,
+          stockAvailable: stockAvail,
+          calculatedQty: parseFloat(calcQty.toFixed(2)),
+          qtyToUse: parseFloat(calcQty.toFixed(2)),
+          unit: ing.unit,
+          isExtra: false
+        };
+      });
+
+      renderFormulationTable();
+    }
+
+    // Render de la tabla del Interactive Grid de Formulación
+    function renderFormulationTable() {
+      const tbody = document.querySelector('#tablaDetalleFormulacion tbody');
+      if (!tbody) return;
+
+      if (activeFormulationLines.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-slate-400">No hay ingredientes cargados.</td></tr>';
+        return;
+      }
 
       let html = '';
-      if (availableItems.length === 0) {
-        html = '<option value="">-- No hay ítems con stock en esta planta --</option>';
-      } else {
-        html = '<option value="">-- Seleccionar Ítem Disponible --</option>';
-        availableItems.forEach(i => {
-          html += `<option value="${i.id}">${i.name} (Stock: ${i.stock} ${i.unit})</option>`;
+      let totalTeoricoGramos = 0;
+      let totalEditableGramos = 0;
+
+      activeFormulationLines.forEach((line, idx) => {
+        const isLowStock = line.qtyToUse > line.stockAvailable;
+
+        if (line.unit === 'g') {
+          totalTeoricoGramos += line.calculatedQty;
+          totalEditableGramos += line.qtyToUse;
+        }
+
+        html += `
+          <tr class="${line.isExtra ? 'bg-amber-50/40' : ''}">
+            <td class="font-mono text-xs font-bold text-slate-500">${line.itemId}</td>
+            <td class="font-bold text-slate-800 flex items-center gap-1.5">
+              <span>${line.name}</span>
+              ${line.isExtra ? '<span class="text-[9px] bg-amber-200 text-amber-900 font-extrabold px-1 py-0.2 rounded">EXTRA</span>' : ''}
+            </td>
+            <td class="text-xs text-slate-600 font-medium">${line.typeRule}</td>
+            <td class="text-right font-mono font-bold ${isLowStock ? 'text-red-600' : 'text-slate-700'}">${line.stockAvailable.toFixed(2)}</td>
+            <td class="text-right font-mono text-slate-600 font-medium">${line.calculatedQty.toFixed(2)}</td>
+            <td class="text-right">
+              <input type="number" step="0.01" min="0" value="${line.qtyToUse}" oninput="updateLineQuantity(${idx}, this.value)" class="apex-input font-mono font-bold text-right text-upecGreen w-32 focus:ring-upecGreen">
+            </td>
+            <td class="font-semibold text-slate-600">${line.unit}</td>
+            <td class="text-center">
+              <button type="button" onclick="removeFormulaLine(${idx})" title="Eliminar ingrediente de la lista" class="text-red-500 hover:text-red-700 p-1">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+
+      // Actualizar totales de masa pre-embutido
+      document.getElementById('totalTeoricoDisplay').innerText = `${totalTeoricoGramos.toFixed(2)} g`;
+      document.getElementById('totalEditableDisplay').innerText = `${totalEditableGramos.toFixed(2)} g`;
+    }
+
+    function updateLineQuantity(idx, val) {
+      const parsed = parseFloat(val);
+      if (!isNaN(parsed) && parsed >= 0) {
+        activeFormulationLines[idx].qtyToUse = parsed;
+        
+        // Recalcular totales sin re-renderizar todo el DOM de los inputs
+        let totalTeoricoGramos = 0;
+        let totalEditableGramos = 0;
+        activeFormulationLines.forEach(l => {
+          if (l.unit === 'g') {
+            totalTeoricoGramos += l.calculatedQty;
+            totalEditableGramos += l.qtyToUse;
+          }
         });
+        document.getElementById('totalTeoricoDisplay').innerText = `${totalTeoricoGramos.toFixed(2)} g`;
+        document.getElementById('totalEditableDisplay').innerText = `${totalEditableGramos.toFixed(2)} g`;
       }
-      itemSelect.innerHTML = html;
-      calculateLiveDispatchPrice();
+    }
+
+    function removeFormulaLine(idx) {
+      const removedName = activeFormulationLines[idx].name;
+      activeFormulationLines.splice(idx, 1);
+      renderFormulationTable();
+      showToast(`Ingrediente "${removedName}" removido de la formulación activa`, 'info');
+    }
+
+    // Modal para Añadir Ingrediente Extra / Insumo Libre
+    function openAddExtraIngredientModal() {
+      const select = document.getElementById('extraItemSelect');
+      let html = '<option value="">-- Seleccionar Insumo/Material de Bodega --</option>';
+      
+      appState.inventory.forEach(item => {
+        html += `<option value="${item.id}">${item.name} (${item.plant}) - Stock: ${item.stock} ${item.unit}</option>`;
+      });
+
+      select.innerHTML = html;
+      document.getElementById('extraQtyInput').value = '';
+      document.getElementById('addExtraIngredientModal').classList.remove('hidden');
+    }
+
+    function closeAddExtraIngredientModal() {
+      document.getElementById('addExtraIngredientModal').classList.add('hidden');
+    }
+
+    function handleAddExtraIngredient(e) {
+      e.preventDefault();
+      const itemId = document.getElementById('extraItemSelect').value;
+      const qty = parseFloat(document.getElementById('extraQtyInput').value) || 0;
+
+      if (!itemId || qty <= 0) {
+        showToast('Seleccione un ítem y especifique una cantidad mayor a 0.', 'warning');
+        return;
+      }
+
+      const invItem = appState.inventory.find(i => i.id === itemId);
+      if (!invItem) return;
+
+      activeFormulationLines.push({
+        itemId: invItem.id,
+        name: invItem.name,
+        typeRule: 'EXTRA_PERSONALIZADO',
+        stockAvailable: invItem.stock,
+        calculatedQty: qty,
+        qtyToUse: qty,
+        unit: invItem.unit,
+        isExtra: true
+      });
+
+      closeAddExtraIngredientModal();
+      renderFormulationTable();
+      showToast(`Ingrediente extra "${invItem.name}" añadido a la receta`, 'success');
+    }
+
+    // Envío de Solicitud de Producción al Bodeguero
+    function handleSendProductionRequest() {
+      const kilosInput = document.getElementById('formKilosInput');
+      const studentInput = document.getElementById('formStudentInput');
+
+      const kilos = parseFloat(kilosInput.value) || 2.08;
+      const student = studentInput.value.trim();
+
+      if (!student) {
+        showToast('Por favor ingrese el nombre/cédula del estudiante solicitante.', 'warning');
+        return;
+      }
+
+      if (activeFormulationLines.length === 0) {
+        showToast('No hay ingredientes en la receta para solicitar.', 'warning');
+        return;
+      }
+
+      const newSolId = "SOL-00" + (appState.solicitudesProduccion.length + 1);
+      
+      const requestItems = activeFormulationLines.map(line => ({
+        itemId: line.itemId,
+        name: line.name,
+        calculatedQty: line.calculatedQty,
+        qtyToUse: line.qtyToUse,
+        unit: line.unit,
+        typeRule: line.typeRule
+      }));
+
+      appState.solicitudesProduccion.unshift({
+        id: newSolId,
+        productName: "Chorizo Picante Barrica del Diablo",
+        kilosToProduce: kilos,
+        applicant: student,
+        plant: "Planta Piloto de Procesamiento de Cárnicos",
+        date: SYSTEM_CURRENT_DATE,
+        status: "PENDIENTE",
+        items: requestItems
+      });
+
+      renderProductionRequestsTable();
+      showToast(`Solicitud de Producción ${newSolId} enviada a Bodega Central con éxito (Estado: PENDIENTE)`, 'success');
+    }
+
+    // Requerimiento UI 2: Panel del Bodeguero (Aprobación)
+    function renderProductionRequestsTable() {
+      const tbody = document.querySelector('#tablaSolicitudesProduccion tbody');
+      const countDisplay = document.getElementById('solicitudesCountDisplay');
+
+      if (!tbody) return;
+
+      if (countDisplay) {
+        countDisplay.innerText = `${appState.solicitudesProduccion.length} solicitudes`;
+      }
+
+      if (appState.solicitudesProduccion.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-slate-400">No hay solicitudes de producción en la cola de bodega.</td></tr>';
+        return;
+      }
+
+      let html = '';
+      appState.solicitudesProduccion.forEach(req => {
+        const isPending = req.status === 'PENDIENTE';
+        const badgeHtml = isPending 
+          ? '<span class="apex-badge-alert"><i class="fa-solid fa-clock"></i> PENDIENTE</span>' 
+          : '<span class="apex-badge-ok"><i class="fa-solid fa-check"></i> APROBADO</span>';
+
+        html += `
+          <tr>
+            <td class="font-mono text-xs font-bold text-slate-500">${req.id}</td>
+            <td class="font-bold text-slate-800">${req.productName}</td>
+            <td class="text-right font-mono font-bold text-upecGreen">${req.kilosToProduce.toFixed(2)} Kg</td>
+            <td class="text-slate-700 font-medium">${req.applicant}</td>
+            <td class="font-mono text-slate-500">${req.date}</td>
+            <td class="text-center font-mono font-bold text-slate-700">${req.items.length} items</td>
+            <td>${badgeHtml}</td>
+            <td class="text-center">
+              <button type="button" onclick="openViewRequestModal('${req.id}')" class="px-3 py-1 bg-upecGreen hover:bg-upecGreenDark text-white text-xs font-bold rounded shadow-xs flex items-center justify-center gap-1.5 mx-auto transition-colors">
+                <i class="fa-solid fa-eye text-upecYellow"></i>
+                <span>Ver Detalle y ${isPending ? 'Aprobar' : 'Ver'}</span>
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+    }
+
+    // Modal de Detalle y Aprobación de la Solicitud
+    let currentViewingRequestId = null;
+
+    function openViewRequestModal(solId) {
+      const req = appState.solicitudesProduccion.find(r => r.id === solId);
+      if (!req) return;
+
+      currentViewingRequestId = solId;
+
+      document.getElementById('viewRequestTitle').innerText = `Detalle de Solicitud - ${req.id}`;
+      document.getElementById('viewReqApplicant').innerText = req.applicant;
+      document.getElementById('viewReqProduct').innerText = req.productName;
+      document.getElementById('viewReqKilos').innerText = `${req.kilosToProduce.toFixed(2)} Kg`;
+
+      const isPending = req.status === 'PENDIENTE';
+      document.getElementById('viewReqStatus').innerHTML = isPending 
+        ? '<span class="apex-badge-alert"><i class="fa-solid fa-clock"></i> PENDIENTE</span>' 
+        : '<span class="apex-badge-ok"><i class="fa-solid fa-check"></i> APROBADO</span>';
+
+      const tbody = document.querySelector('#tablaDetalleViewRequest tbody');
+      let html = '';
+      let hasStockDeficit = false;
+
+      req.items.forEach(line => {
+        const invItem = appState.inventory.find(i => i.id === line.itemId || i.name.toLowerCase() === line.name.toLowerCase());
+        const stockAvail = invItem ? invItem.stock : 0;
+        const isSufficient = stockAvail >= line.qtyToUse;
+
+        if (!isSufficient && isPending) {
+          hasStockDeficit = true;
+        }
+
+        html += `
+          <tr>
+            <td class="font-mono text-slate-500 font-bold">${line.itemId}</td>
+            <td class="font-semibold text-slate-800">${line.name}</td>
+            <td class="text-right font-mono font-bold text-upecGreen">${line.qtyToUse.toFixed(2)}</td>
+            <td class="text-slate-600 font-medium">${line.unit}</td>
+            <td class="text-right font-mono font-bold ${!isSufficient && isPending ? 'text-red-600' : 'text-slate-700'}">${stockAvail.toFixed(2)}</td>
+            <td>
+              ${isSufficient 
+                ? '<span class="apex-badge-ok"><i class="fa-solid fa-check"></i> Suficiente</span>' 
+                : '<span class="apex-badge-caducado"><i class="fa-solid fa-triangle-exclamation"></i> Insuficiente</span>'}
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+
+      const actionsDiv = document.getElementById('viewRequestActionButtons');
+      if (isPending) {
+        actionsDiv.innerHTML = `
+          <button type="button" onclick="approveProductionRequest('${req.id}')" ${hasStockDeficit ? 'disabled' : ''} class="px-5 py-2 ${hasStockDeficit ? 'bg-slate-300 text-slate-500 cursor-not-allowed' : 'bg-upecGreen hover:bg-upecGreenDark text-white'} text-xs font-bold rounded shadow-xs flex items-center gap-1.5 transition-colors">
+            <i class="fa-solid fa-check-double text-upecYellow"></i>
+            <span>${hasStockDeficit ? 'Stock Insuficiente en Bodega' : 'Aprobar y Despachar Stock de Bodega'}</span>
+          </button>
+        `;
+      } else {
+        actionsDiv.innerHTML = '<span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded border border-emerald-200"><i class="fa-solid fa-circle-check"></i> Solicitud Aprobada y Stock Descontado</span>';
+      }
+
+      document.getElementById('viewRequestModal').classList.remove('hidden');
+    }
+
+    function closeViewRequestModal() {
+      document.getElementById('viewRequestModal').classList.add('hidden');
+      currentViewingRequestId = null;
+    }
+
+    // Aprobación y resta automática del inventario (Bodeguero Central)
+    function approveProductionRequest(solId) {
+      const req = appState.solicitudesProduccion.find(r => r.id === solId);
+      if (!req || req.status !== 'PENDIENTE') return;
+
+      // Verificar stock nuevamente
+      let canApprove = true;
+      let insufficientItem = '';
+
+      req.items.forEach(line => {
+        const invItem = appState.inventory.find(i => i.id === line.itemId || i.name.toLowerCase() === line.name.toLowerCase());
+        if (!invItem || invItem.stock < line.qtyToUse) {
+          canApprove = false;
+          insufficientItem = line.name;
+        }
+      });
+
+      if (!canApprove) {
+        showToast(`No se puede aprobar: Stock insuficiente para "${insufficientItem}"`, 'danger');
+        return;
+      }
+
+      // Restar del array inventory (stock -= cantidad_calculada / qtyToUse)
+      req.items.forEach(line => {
+        const invItem = appState.inventory.find(i => i.id === line.itemId || i.name.toLowerCase() === line.name.toLowerCase());
+        if (invItem) {
+          invItem.stock = Math.max(0, invItem.stock - line.qtyToUse);
+        }
+      });
+
+      // Cambiar estado a APROBADO
+      req.status = 'APROBADO';
+
+      // Registrar en el historial global de despachos para mantener compatibilidad
+      const newDspId = "DSP-00" + (appState.dispatches.length + 1);
+      appState.dispatches.unshift({
+        id: newDspId,
+        plant: req.plant,
+        item: `BOM Receta: ${req.productName} (${req.kilosToProduce} Kg) [Solicitud: ${req.id}]`,
+        qty: req.kilosToProduce,
+        recipient: req.applicant,
+        technician: "Bodeguero Central (APEX Auto-Approval)",
+        date: SYSTEM_CURRENT_DATE
+      });
+
+      closeViewRequestModal();
+      renderInventoryTable();
+      renderProductionRequestsTable();
+      renderDispatchHistoryTable();
+      updateDashboardMetrics();
+
+      showToast(`¡Solicitud ${req.id} APROBADA exitosamente! El stock fue descontado automáticamente de Bodega Central.`, 'success');
     }
 
     // Project Field control for Equipo
@@ -1921,119 +2508,16 @@
       tbody.innerHTML = html;
     }
 
-    // Live Calculation in dispatch
-    function calculateLiveDispatchPrice() {
-      const selectElem = document.getElementById('despachoItemSelect');
-      const qtyElem = document.getElementById('despachoCantidad');
-      const typeElem = document.getElementById('despachoTipoOperacion');
-      const alertElem = document.getElementById('despachoCalculoAlerta');
-      const textElem = document.getElementById('despachoCalculoTexto');
-
-      if (!selectElem || !qtyElem || !typeElem || !alertElem || !textElem) return;
-
-      const itemId = selectElem.value;
-      const qty = parseFloat(qtyElem.value) || 0;
-      const opType = typeElem.value;
-
-      if (opType === 'Venta' && itemId && qty > 0) {
-        const item = appState.inventory.find(i => i.id === itemId);
-        if (item && item.category !== 'Material') {
-          const price = item.price || 0;
-          const total = qty * price;
-          textElem.innerText = ` ${qty.toFixed(2)} ${item.unit} x $${price.toFixed(2)} = $${total.toFixed(2)} USD`;
-          alertElem.classList.remove('hidden');
-          return;
-        }
-      }
-      alertElem.classList.add('hidden');
+    function updateDispatchItemSelect() {
+      // Legacy compatibility wrapper
     }
 
-    function handleProcessDispatch(e) {
-      e.preventDefault();
-      const plant = document.getElementById('despachoPlantaOrigen').value;
-      const itemId = document.getElementById('despachoItemSelect').value;
-      const opType = document.getElementById('despachoTipoOperacion').value;
-      const recipient = document.getElementById('despachoEstudiante').value.trim();
-      const technician = document.getElementById('despachoTecnico').value.trim();
-      const date = document.getElementById('despachoFecha').value;
-      const qty = parseFloat(document.getElementById('despachoCantidad').value) || 0;
-
-      if (!itemId || !recipient || !technician || qty <= 0) {
-        showToast('Complete todos los campos del despacho.', 'warning');
-        return;
-      }
-
-      const itemObj = appState.inventory.find(i => i.id === itemId);
-      if (!itemObj) return;
-
-      if (qty > itemObj.stock) {
-        showToast(`La cantidad supera el stock disponible (${itemObj.stock} ${itemObj.unit})`, 'danger');
-        return;
-      }
-
-      // Subtract stock in memory
-      itemObj.stock -= qty;
-
-      let transactionLabel = '';
-      if (opType === 'Venta') {
-        const totalVenta = qty * (itemObj.price || 0);
-        appState.fondoRotativo += totalVenta;
-        transactionLabel = ` [Venta Pública: $${totalVenta.toFixed(2)}]`;
-      } else {
-        transactionLabel = ' [Despacho Académico]';
-      }
-
-      // Add dispatch record
-      const newDspId = "DSP-00" + (appState.dispatches.length + 1);
-      appState.dispatches.unshift({
-        id: newDspId,
-        plant: plant,
-        item: `${itemObj.name} (${qty} ${itemObj.unit})${transactionLabel}`,
-        qty: qty,
-        recipient: recipient,
-        technician: technician,
-        date: date
-      });
-
-      renderInventoryTable();
-      renderDispatchHistoryTable();
-      updateDispatchItemSelect();
-      updateDashboardMetrics();
-
-      if (opType === 'Venta') {
-        showToast(`Venta procesada exitosamente. Se sumaron $${(qty * (itemObj.price || 0)).toFixed(2)} al Fondo Rotativo.`, 'success');
-      } else {
-        showToast('Despacho académico procesado exitosamente y stock descontado', 'success');
-      }
-      document.getElementById('despachoEstudiante').value = '';
-      document.getElementById('despachoCantidad').value = '';
-      calculateLiveDispatchPrice();
+    function calculateLiveDispatchPrice() {
+      // Legacy compatibility wrapper
     }
 
     function renderDispatchHistoryTable() {
-      const tbody = document.querySelector('#tablaHistorialDespachos tbody');
-      document.getElementById('dispatchHistoryCount').innerText = `${appState.dispatches.length} despachos`;
-
-      if (appState.dispatches.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-slate-400">No se han registrado despachos.</td></tr>';
-        return;
-      }
-
-      let html = '';
-      appState.dispatches.forEach(d => {
-        html += `
-          <tr>
-            <td class="font-mono text-xs text-slate-500 font-bold">${d.id}</td>
-            <td class="font-semibold text-slate-800">${d.plant}</td>
-            <td class="font-bold text-upecGreen">${d.item}</td>
-            <td class="text-right font-mono font-bold text-slate-800">${d.qty.toFixed(2)}</td>
-            <td class="text-slate-700 font-medium">${d.recipient}</td>
-            <td class="text-slate-600">${d.technician}</td>
-            <td class="font-mono text-slate-500">${d.date}</td>
-          </tr>
-        `;
-      });
-      tbody.innerHTML = html;
+      // Legacy compatibility wrapper
     }
 
     // TOAST NOTIFICATIONS UTILITY
