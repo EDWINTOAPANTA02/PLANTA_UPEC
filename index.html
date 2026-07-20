@@ -1295,6 +1295,7 @@
       renderEquipmentCards();
       updateDashboardMetrics();
       renderMovementsTable();
+      initModuloDespachos();
     });
 
     // 1. TOGGLE SIDEBAR MENU
@@ -1357,6 +1358,7 @@
         case 'despachos':
           titleElem.innerHTML = '<i class="fa-solid fa-truck-arrow-right text-upecGreen"></i><span>Módulo de Despachos Transaccionales</span>';
           breadcrumbElem.innerText = 'Módulo de Despachos';
+          initModuloDespachos();
           break;
       }
     }
@@ -2152,34 +2154,39 @@
 
     // Envía la orden armada a la bandeja del bodeguero
     function enviarLoteABodega() {
-      const nombre = document.getElementById('estudianteNombre').value.trim();
-      const totalKg = parseFloat(document.getElementById('lblCantidadTotalKg').innerText);
+      const nombreInput = document.getElementById('estudianteNombre');
+      let nombre = nombreInput ? nombreInput.value.trim() : '';
 
       if (!nombre) {
-        showToast('Ingrese el nombre del estudiante responsable de la práctica', 'warning');
-        return;
-      }
-      if (itemsFormulacion.length === 0) {
-        showToast('No hay elementos en la orden', 'danger');
+        showToast('Ingrese el nombre del estudiante o responsable de la práctica.', 'warning');
+        if (nombreInput) nombreInput.focus();
         return;
       }
 
-      const idSolicitud = "BOM-00" + (appState.solicitudesBOM ? appState.solicitudesBOM.length + 1 : 1);
+      if (!itemsFormulacion || itemsFormulacion.length === 0) {
+        showToast('No hay elementos en la orden de formulación.', 'danger');
+        return;
+      }
+
+      const totalKgElem = document.getElementById('lblCantidadTotalKg');
+      const totalKg = totalKgElem ? (parseFloat(totalKgElem.innerText) || 2.09) : 2.09;
+
       if (!appState.solicitudesBOM) appState.solicitudesBOM = [];
+      const idSolicitud = "BOM-00" + (appState.solicitudesBOM.length + 1);
 
       appState.solicitudesBOM.unshift({
         id: idSolicitud,
-        fecha: SYSTEM_CURRENT_DATE,
+        fecha: typeof SYSTEM_CURRENT_DATE !== 'undefined' ? SYSTEM_CURRENT_DATE : '2026-07-03',
         estudiante: nombre,
         producto: 'Chorizo Picante Barrica del Diablo',
         kilos: totalKg,
         estado: 'PENDIENTE',
-        detalle: [...itemsFormulacion]
+        detalle: itemsFormulacion.map(i => ({ ...i }))
       });
 
       // Limpiar y resetear campos visuales
-      document.getElementById('estudianteNombre').value = '';
-      showToast(`Solicitud ${idSolicitud} enviada a Bodega Central`, 'success');
+      if (nombreInput) nombreInput.value = '';
+      showToast(`Solicitud ${idSolicitud} enviada con éxito a Bodega Central`, 'success');
       renderColaBodega();
     }
 
@@ -2196,15 +2203,18 @@
       appState.solicitudesBOM.forEach(sol => {
         let badge = sol.estado === 'PENDIENTE' ? '<span class="apex-badge-alert">Pendiente</span>' : '<span class="apex-badge-ok">Despachado</span>';
         let boton = sol.estado === 'PENDIENTE' 
-          ? `<button onclick="aprobarDespachoBodega('${sol.id}')" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded text-[11px] transition-colors"><i class="fa-solid fa-check"></i> Despachar</button>`
+          ? `<button type="button" onclick="aprobarDespachoBodega('${sol.id}')" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded text-[11px] transition-colors"><i class="fa-solid fa-check"></i> Despachar</button>`
           : '<span class="text-slate-400 italic">Entregado</span>';
 
+        const kilosNum = typeof sol.kilos === 'number' ? sol.kilos : parseFloat(sol.kilos);
+        const kilosStr = (!isNaN(kilosNum) ? kilosNum : 0).toFixed(2);
+
         html += `
-          <tr>
+          <tr class="hover:bg-slate-50 transition-colors">
             <td class="font-bold text-slate-800 py-2 px-3">${sol.id}</td>
             <td class="text-slate-500 py-2 px-3">${sol.fecha}</td>
-            <td class="font-semibold py-2 px-3">${sol.estudiante}</td>
-            <td class="font-mono text-right font-bold text-upecGreen py-2 px-3">${sol.kilos.toFixed(2)} Kg</td>
+            <td class="font-semibold py-2 px-3 text-slate-800">${sol.estudiante}</td>
+            <td class="font-mono text-right font-bold text-upecGreen py-2 px-3">${kilosStr} Kg</td>
             <td class="text-center py-2 px-3">${badge}</td>
             <td class="text-center py-2 px-3">${boton}</td>
           </tr>
