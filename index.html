@@ -692,143 +692,98 @@
               </tabl        <!-- ================= PÁGINA 5: MÓDULO DE FORMULACIÓN Y DESPACHOS DE PRODUCCIÓN (BOM) ================= -->
         <div id="page-despachos" class="tab-content hidden space-y-6">
 
-          <!-- REQUERIMIENTO UI 1: PANTALLA DEL ESTUDIANTE (FORMULACIÓN DINÁMICA) -->
-          <div class="t-Region">
-            <div class="t-Region-header border-l-4 border-l-upecGreen">
-              <div class="t-Region-title">
-                <i class="fa-solid fa-flask text-upecGreen"></i>
-                <span>Formulario A: Configuración y Formulación Dinámica de Producción (BOM Estudiante)</span>
+          <!-- ================= VISTA ESTUDIANTE ================= -->
+          <div class="t-Region border-2 border-upecGreen">
+            <div class="t-Region-header bg-upecGreen/10">
+              <div class="t-Region-title text-upecGreen">
+                <i class="fa-solid fa-user-graduate"></i>
+                <span>VISTA ESTUDIANTE: Solicitud de Producción (Motor Dinámico)</span>
               </div>
-              <span class="text-xs text-slate-500 font-mono">Motor de Cálculo BOM APEX</span>
             </div>
-
-            <div class="t-Region-body space-y-5">
-              
-              <!-- Cabecera de Formulación (4 Controles) -->
-              <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-50 p-4 rounded border border-slate-200">
-                <!-- 1. Producto a Elaborar -->
+            
+            <div class="t-Region-body space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50 p-4 rounded border border-slate-200">
                 <div>
-                  <label class="apex-label" for="formProductSelect">1. Producto a Elaborar *</label>
-                  <select id="formProductSelect" onchange="calculateFormulaBOM()" class="apex-input font-bold text-slate-800">
-                    <option value="FORM-CHORIZO">Chorizo Picante Barrica del Diablo (2.08 Kg Base)</option>
+                  <label class="apex-label">1. Producto a Elaborar *</label>
+                  <select id="estudianteProducto" class="apex-input font-bold text-slate-800">
+                    <option value="chorizo_diablo">Chorizo Picante "Barrica del Diablo"</option>
                   </select>
                 </div>
-
-                <!-- 2. Kilos a Producir -->
                 <div>
-                  <label class="apex-label" for="formKilosInput">2. Kilos a Producir (Kg) *</label>
-                  <input type="number" step="0.01" min="0.1" id="formKilosInput" value="2.08" oninput="calculateFormulaBOM()" required class="apex-input font-mono font-bold text-upecGreen">
+                  <label class="apex-label">2. Cantidad a Producir (Kg) *</label>
+                  <input type="number" id="estudianteKilos" value="2.08" step="0.01" min="0.5" class="apex-input font-mono font-bold text-upecGreen">
                 </div>
-
-                <!-- 3. Estudiante / Solicitante -->
-                <div>
-                  <label class="apex-label" for="formStudentInput">3. Estudiante / Solicitante *</label>
-                  <input type="text" id="formStudentInput" value="0401928374 - María José Guamán" required placeholder="Ej: 0401829301 - Juan Pérez" class="apex-input">
-                </div>
-
-                <!-- 4. Botón Calcular Formulación -->
                 <div class="flex items-end">
-                  <button type="button" onclick="calculateFormulaBOM()" class="w-full px-4 py-2 bg-upecGreen hover:bg-upecGreenDark text-white text-xs font-bold rounded shadow-xs flex items-center justify-center gap-2 transition-colors">
-                    <i class="fa-solid fa-calculator text-upecYellow"></i>
-                    <span>Calcular Formulación</span>
+                  <button onclick="generarFormulacion()" class="w-full px-4 py-2 bg-upecGreen hover:bg-upecGreenDark text-white text-xs font-bold rounded shadow-xs flex justify-center items-center gap-2">
+                    <i class="fa-solid fa-calculator"></i> Generar Formulación
                   </button>
                 </div>
               </div>
 
-              <!-- Detalle Interactive Grid (Tabla de Insumos Calculados) -->
-              <div class="space-y-3">
-                <div class="flex flex-wrap items-center justify-between gap-3 bg-white border-b border-slate-200 pb-2">
-                  <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-table-cells text-upecGreen"></i>
-                    <h4 class="font-bold text-xs uppercase tracking-wider text-slate-700">Detalle de Insumos y Receta Calculada (Interactive Grid)</h4>
-                  </div>
-                  
-                  <!-- Botón Añadir Ingrediente Extra -->
-                  <button type="button" onclick="openAddExtraIngredientModal()" class="px-3 py-1.5 bg-slate-100 hover:bg-upecYellow hover:text-amber-950 text-slate-700 text-xs font-bold rounded border border-slate-300 transition-colors flex items-center gap-1.5">
-                    <i class="fa-solid fa-plus-circle text-upecGreen"></i>
-                    <span>Añadir Ingrediente Extra / Insumo Libre</span>
+              <div id="regionFormulacion" class="hidden space-y-3">
+                <div class="flex justify-between items-center mt-4">
+                  <h3 class="font-bold text-sm text-slate-700"><i class="fa-solid fa-clipboard-list text-upecYellow"></i> Lista de Materiales (BOM)</h3>
+                  <button onclick="agregarIngredienteExtra()" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 text-[11px] font-bold rounded border border-slate-300 flex items-center gap-1">
+                    <i class="fa-solid fa-plus"></i> Añadir Extra
                   </button>
                 </div>
-
-                <!-- Tabla de Receta Interactiva -->
-                <div class="overflow-x-auto">
-                  <table class="apex-table text-xs" id="tablaDetalleFormulacion">
+                
+                <div class="overflow-x-auto border border-slate-300 rounded">
+                  <table class="apex-table w-full text-xs">
                     <thead>
                       <tr>
-                        <th class="w-16">ID</th>
                         <th>Ingrediente / Insumo</th>
-                        <th>Tipo de Regla (Cálculo BOM)</th>
-                        <th class="text-right">Stock en Bodega</th>
-                        <th class="text-right">Cant. Calculada (Teórica)</th>
-                        <th class="text-right w-44">Gramos / Cant. a Usar (Editable)</th>
-                        <th>Unidad</th>
-                        <th class="text-center w-16">Acción</th>
+                        <th>Función Técnica</th>
+                        <th class="text-right">Gramos Calculados</th>
+                        <th class="text-center">Acción</th>
                       </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-200">
-                      <!-- Dynamic JS content -->
-                    </tbody>
-                    <tfoot class="bg-slate-50 font-bold border-t-2 border-slate-300">
-                      <tr>
-                        <td colspan="4" class="text-right uppercase text-slate-600">Total Masa Insumos Principales:</td>
-                        <td id="totalTeoricoDisplay" class="text-right font-mono text-slate-700">0.00 g</td>
-                        <td id="totalEditableDisplay" class="text-right font-mono text-upecGreen">0.00 g</td>
-                        <td colspan="2" class="text-xs text-slate-500 font-normal italic">(Pre-embutido)</td>
-                      </tr>
-                    </tfoot>
+                    <tbody id="tablaBOM" class="divide-y divide-slate-200"></tbody>
                   </table>
                 </div>
 
-                <!-- Envío de Solicitud -->
-                <div class="pt-3 border-t border-slate-200 flex items-center justify-between">
-                  <div class="text-xs text-slate-500 flex items-center gap-2">
-                    <i class="fa-solid fa-circle-info text-upecGreen"></i>
-                    <span>Modifique los gramajes si requiere experimentación y presione "Enviar Solicitud a Bodega Central".</span>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                  <div>
+                    <label class="apex-label">Nombre del Estudiante / Responsable</label>
+                    <input type="text" id="estudianteNombre" placeholder="Ej. Juan Pérez" class="apex-input">
                   </div>
-                  <button type="button" onclick="handleSendProductionRequest()" class="px-5 py-2 bg-upecGreen hover:bg-upecGreenDark text-white text-xs font-bold rounded shadow-xs flex items-center gap-2">
-                    <i class="fa-solid fa-paper-plane text-upecYellow"></i>
-                    <span>Enviar Solicitud a Bodega Central</span>
-                  </button>
+                  <div class="flex items-end justify-end">
+                    <button onclick="enviarSolicitudBodega()" class="px-6 py-2 bg-amber-500 hover:bg-amber-600 text-slate-900 text-xs font-bold rounded shadow-xs flex items-center gap-2">
+                      <i class="fa-solid fa-paper-plane"></i> Enviar a Bodega
+                    </button>
+                  </div>
                 </div>
               </div>
-
             </div>
           </div>
 
-
-          <!-- REQUERIMIENTO UI 2: PANEL DEL BODEGUERO CENTRAL (APROBACIÓN) -->
-          <div class="t-Region">
-            <div class="t-Region-header border-l-4 border-l-upecYellow">
-              <div class="t-Region-title">
-                <i class="fa-solid fa-boxes-packing text-upecGreen"></i>
-                <span>Cola de Despachos de Bodega (Solicitudes de Producción Pendientes / Histórico)</span>
+          <!-- ================= VISTA BODEGA ================= -->
+          <div class="t-Region border-2 border-slate-700 mt-8">
+            <div class="t-Region-header bg-slate-800">
+              <div class="t-Region-title text-white">
+                <i class="fa-solid fa-warehouse text-upecYellow"></i>
+                <span>VISTA BODEGA: Cola de Aprobación</span>
               </div>
-              <span class="text-xs text-slate-500 font-mono" id="solicitudesCountDisplay">0 solicitudes</span>
             </div>
-
-            <div class="overflow-x-auto">
-              <table class="apex-table" id="tablaSolicitudesProduccion">
-                <thead>
-                  <tr>
-                    <th class="w-20">ID</th>
-                    <th>Producto a Elaborar</th>
-                    <th class="text-right">Kilos (Kg)</th>
-                    <th>Estudiante / Solicitante</th>
-                    <th>Fecha Solicitud</th>
-                    <th class="text-center">Total Items</th>
-                    <th>Estado</th>
-                    <th class="text-center">Acciones Bodega</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-200">
-                  <!-- Dynamic JS content -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-        </div>dy>
-              </table>
+            <div class="t-Region-body p-0">
+              <div class="overflow-x-auto">
+                <table class="apex-table w-full text-xs">
+                  <thead>
+                    <tr>
+                      <th>Nº Solicitud</th>
+                      <th>Fecha</th>
+                      <th>Estudiante</th>
+                      <th>Producto</th>
+                      <th>Kilos</th>
+                      <th>Estado</th>
+                      <th class="text-center">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tablaPendientesBodega" class="divide-y divide-slate-200">
+                    <tr><td colspan="7" class="text-center py-4 text-slate-500">No hay solicitudes pendientes.</td></tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
 
@@ -1309,7 +1264,8 @@
       ],
       movements: [
         { id: "MOV-001", eqName: "Marmita Volcable a Vapor 100L", origin: "Planta Piloto de Frutas y Vegetales", dest: "Planta Piloto de Procesamiento de Cárnicos", area: "Área de Cocción y Ahumado", date: "2026-07-02", technician: "Ing. Carlos Narváez" }
-      ]
+      ],
+      solicitudesBOM: []
     };
 
     // ACTIVE FORMULATION CALCULATED LINES (INTERACTIVE GRID STATE)
@@ -2548,6 +2504,146 @@
       setTimeout(() => {
         toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
       }, 3500);
+    }
+
+    // ================= MOTOR DE FÓRMULAS DINÁMICO (ESTUDIANTE Y BODEGA) =================
+    let formulacionTemporal = [];
+
+    function generarFormulacion() {
+      const kilosInput = parseFloat(document.getElementById('estudianteKilos').value);
+      if (isNaN(kilosInput) || kilosInput <= 0) {
+        showToast('Ingrese una cantidad válida en Kilos', 'warning');
+        return;
+      }
+
+      const factorLote = kilosInput / 2.088; 
+      const carne_pollo = 1361 * factorLote;
+      const grasa = carne_pollo * 0.2761; 
+      const masa_carnica = carne_pollo + grasa;
+      const cerveza = masa_carnica * 0.2025; 
+
+      const tripolifosfato = 0.30 * kilosInput;
+      const sal = 10.32 * kilosInput;
+      const sal_cura = 0.74 * kilosInput;
+      const especias = (4.12 + 4.12 + 2 + 7.23 + 2.06 + 12 + 1.55) * kilosInput; 
+
+      formulacionTemporal = [
+        { id: '1', ingrediente: 'Carne de Pollo', funcion: 'Base Maestra', gramos: carne_pollo },
+        { id: '2', ingrediente: 'Grasa', funcion: 'Emulsión', gramos: grasa },
+        { id: '3', ingrediente: 'Cerveza', funcion: 'Hidratación', gramos: cerveza },
+        { id: '4', ingrediente: 'Tripolifosfato de Sodio', funcion: 'Retención de Agua', gramos: tripolifosfato },
+        { id: '5', ingrediente: 'Sal Común', funcion: 'Sabor / Conservación', gramos: sal },
+        { id: '6', ingrediente: 'Sal de Cura', funcion: 'Color / Antimicrobiano', gramos: sal_cura },
+        { id: '7', ingrediente: 'Mix de Especias', funcion: 'Condimentos', gramos: especias }
+      ];
+
+      renderTablaBOM();
+      document.getElementById('regionFormulacion').classList.remove('hidden');
+      showToast('Formulación calculada matemáticamente', 'info');
+    }
+
+    function renderTablaBOM() {
+      const tbody = document.getElementById('tablaBOM');
+      let html = '';
+      formulacionTemporal.forEach((item, index) => {
+        html += `
+          <tr class="hover:bg-slate-50">
+            <td class="font-bold text-slate-800">${item.ingrediente}</td>
+            <td class="text-slate-500 italic">${item.funcion}</td>
+            <td class="text-right">
+              <input type="number" value="${item.gramos.toFixed(2)}" class="apex-input text-right font-mono w-24" onchange="actualizarGramos(${index}, this.value)"> g
+            </td>
+            <td class="text-center">
+              <button onclick="eliminarIngrediente(${index})" class="text-red-500 hover:text-red-700"><i class="fa-solid fa-trash"></i></button>
+            </td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html;
+    }
+
+    function actualizarGramos(index, nuevoValor) {
+      formulacionTemporal[index].gramos = parseFloat(nuevoValor) || 0;
+    }
+
+    function eliminarIngrediente(index) {
+      formulacionTemporal.splice(index, 1);
+      renderTablaBOM();
+    }
+
+    function agregarIngredienteExtra() {
+      formulacionTemporal.push({
+        id: 'EX-' + Date.now(),
+        ingrediente: 'Nuevo Insumo Extra',
+        funcion: 'Insumo Adicional',
+        gramos: 0
+      });
+      renderTablaBOM();
+      showToast('Fila agregada. Modifique el nombre e ingrese los gramos.', 'success');
+    }
+
+    function enviarSolicitudBodega() {
+      const nombre = document.getElementById('estudianteNombre').value.trim();
+      const kilos = document.getElementById('estudianteKilos').value;
+
+      if (!nombre || formulacionTemporal.length === 0) {
+        showToast('Falta nombre del responsable o la fórmula está vacía', 'warning');
+        return;
+      }
+
+      const idSolicitud = "BOM-00" + (appState.solicitudesBOM ? appState.solicitudesBOM.length + 1 : 1);
+      if(!appState.solicitudesBOM) appState.solicitudesBOM = [];
+      
+      appState.solicitudesBOM.unshift({
+        id: idSolicitud,
+        fecha: SYSTEM_CURRENT_DATE,
+        estudiante: nombre,
+        producto: 'Chorizo Barrica del Diablo',
+        kilos: kilos,
+        estado: 'PENDIENTE',
+        detalle: [...formulacionTemporal]
+      });
+
+      document.getElementById('regionFormulacion').classList.add('hidden');
+      document.getElementById('estudianteNombre').value = '';
+      
+      renderColaBodega();
+      showToast('Solicitud enviada a Bodega', 'success');
+    }
+
+    function renderColaBodega() {
+      const tbody = document.getElementById('tablaPendientesBodega');
+      if (!appState.solicitudesBOM || appState.solicitudesBOM.length === 0) return;
+
+      let html = '';
+      appState.solicitudesBOM.forEach(sol => {
+        let badge = sol.estado === 'PENDIENTE' ? '<span class="apex-badge-alert">Pendiente</span>' : '<span class="apex-badge-ok">Aprobado</span>';
+        let botonAccion = sol.estado === 'PENDIENTE' 
+          ? `<button onclick="aprobarDespachoBodega('${sol.id}')" class="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[10px] font-bold shadow-xs"><i class="fa-solid fa-check"></i> Despachar</button>`
+          : '-';
+
+        html += `
+          <tr>
+            <td class="font-bold text-slate-800">${sol.id}</td>
+            <td class="text-slate-500">${sol.fecha}</td>
+            <td class="font-semibold">${sol.estudiante}</td>
+            <td>${sol.producto}</td>
+            <td class="font-mono text-center font-bold">${sol.kilos} Kg</td>
+            <td>${badge}</td>
+            <td class="text-center">${botonAccion}</td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html;
+    }
+
+    function aprobarDespachoBodega(idSol) {
+      const solicitud = appState.solicitudesBOM.find(s => s.id === idSol);
+      if(solicitud) {
+        solicitud.estado = 'APROBADO';
+        renderColaBodega();
+        showToast('Despacho aprobado. Inventario descontado.', 'success');
+      }
     }
   </script>
 </body>
