@@ -2232,8 +2232,8 @@
       appState.solicitudesBOM.forEach(sol => {
         let badge = sol.estado === 'PENDIENTE' ? '<span class="apex-badge-alert">Pendiente</span>' : '<span class="apex-badge-ok">Despachado</span>';
         let boton = sol.estado === 'PENDIENTE' 
-          ? `<button type="button" onclick="aprobarDespachoBodega('${sol.id}')" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded text-[11px] transition-colors"><i class="fa-solid fa-check"></i> Despachar</button>`
-          : '<span class="text-slate-400 italic">Entregado</span>';
+          ? `<button type="button" onclick="verSolicitudBodegaModal('${sol.id}')" class="px-3 py-1 bg-upecGreen hover:bg-upecGreenDark text-white font-bold rounded text-[11px] transition-colors flex items-center gap-1.5 mx-auto"><i class="fa-solid fa-box-open text-upecYellow"></i> Ver e Inspeccionar Insumos</button>`
+          : `<button type="button" onclick="verSolicitudBodegaModal('${sol.id}')" class="px-3 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded text-[11px] transition-colors flex items-center gap-1 mx-auto"><i class="fa-solid fa-eye"></i> Ver Detalle</button>`;
 
         const kilosNum = typeof sol.kilos === 'number' ? sol.kilos : parseFloat(sol.kilos);
         const kilosStr = (!isNaN(kilosNum) ? kilosNum : 0).toFixed(2);
@@ -2252,23 +2252,107 @@
       tbody.innerHTML = html;
     }
 
-    function aprobarDespachoBodega(idSol) {
+    // Modal 5: Abre la inspección detallada de la receta pedida por el alumno
+    function verSolicitudBodegaModal(idSol) {
       const sol = appState.solicitudesBOM.find(s => s.id === idSol);
       if (!sol) return;
 
-      // Descontar las existencias físicas reales de la bodega central
-      sol.detalle.forEach(itemBOM => {
-        const itemInv = appState.inventory.find(i => i.id === itemBOM.id);
-        if (itemInv) {
-          itemInv.stock = Math.max(0, itemInv.stock - itemBOM.grams);
+      document.getElementById('viewRequestTitle').innerText = `Detalle de Solicitud: ${sol.id}`;
+      document.getElementById('viewReqApplicant').innerText = sol.estudiante;
+      document.getElementById('viewReqProduct').innerText = sol.producto;
+      document.getElementById('viewReqKilos').innerText = (parseFloat(sol.kilos) || 0).toFixed(2) + " Kg";
+      
+      const statusSpan = document.getElementById('viewReqStatus');
+      if (statusSpan) {
+        statusSpan.innerHTML = sol.estado === 'PENDIENTE' ? '<span class="apex-badge-alert">PENDIENTE</span>' : '<span class="apex-badge-ok">DESPACHADO</span>';
+      }
+
+      // Renderizar tabla de insumos pedidos por el estudiante
+      const tbody = document.querySelector('#tablaDetalleViewRequest tbody');
+      if (tbody) {
+        let html = '';
+        sol.detalle.forEach((item, idx) => {
+          const invItem = appState.inventory.find(i => i.id === item.id || i.name.toLowerCase() === item.name.toLowerCase());
+          const stockActual = invItem ? invItem.stock : 0;
+          const unidad = invItem ? invItem.unit : (item.unit || 'g');
+          const itemGrams = item.grams || 0;
+          
+          let stockBadge = stockActual >= itemGrams 
+            ? '<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded">Suficiente</span>'
+            : '<span class="px-2 py-0.5 bg-red-100 text-red-800 text-[10px] font-bold rounded">Insuficiente</span>';
+
+          html += `
+            <tr class="hover:bg-slate-50">
+              <td class="py-2 px-3">
+                <input type="checkbox" id="chk_item_${idx}" value="${item.id}" data-grams="${itemGrams}" class="item-despacho-cb rounded text-upecGreen focus:ring-upecGreen" ${sol.estado === 'PENDIENTE' ? 'checked' : 'disabled'}>
+              </td>
+              <td class="py-2 px-3 font-mono font-bold text-slate-700">${item.id}</td>
+              <td class="py-2 px-3 font-semibold text-slate-800">${item.name}</td>
+              <td class="py-2 px-3 text-right font-mono font-bold text-upecGreen">${itemGrams.toFixed(2)}</td>
+              <td class="py-2 px-3 text-slate-500 font-medium">${unidad}</td>
+              <td class="py-2 px-3 text-right font-mono font-bold text-slate-700">${stockActual.toFixed(2)} ${unidad}</td>
+              <td class="py-2 px-3 text-center">${stockBadge}</td>
+            </tr>
+          `;
+        });
+        tbody.innerHTML = html;
+      }
+
+      // Renderizar botones de acción según el estado
+      const actionsDiv = document.getElementById('viewRequestActionButtons');
+      if (actionsDiv) {
+        if (sol.estado === 'PENDIENTE') {
+          actionsDiv.innerHTML = `
+            <button type="button" onclick="confirmarDespachoDesdeModal('${sol.id}')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded text-xs shadow-md flex items-center gap-1.5 transition-colors">
+              <i class="fa-solid fa-check-double text-upecYellow"></i> Confirmar y Despachar Insumos Seleccionados
+            </button>
+          `;
+        } else {
+          actionsDiv.innerHTML = `
+            <span class="text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-1.5 rounded border border-emerald-300 flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-check text-emerald-600"></i> Despachado por Bodega Central
+            </span>
+          `;
+        }
+      }
+
+      document.getElementById('viewRequestModal').classList.remove('hidden');
+    }
+
+    function closeViewRequestModal() {
+      document.getElementById('viewRequestModal').classList.add('hidden');
+    }
+
+    // Procesa el despacho reduciendo las existencias físicas reales de la bodega central
+    function confirmarDespachoDesdeModal(idSol) {
+      const sol = appState.solicitudesBOM.find(s => s.id === idSol);
+      if (!sol) return;
+
+      const checkboxes = document.querySelectorAll('.item-despacho-cb:checked');
+      if (checkboxes.length === 0) {
+        showToast('Seleccione al menos un insumo para despachar.', 'warning');
+        return;
+      }
+
+      checkboxes.forEach(cb => {
+        const itemId = cb.value;
+        const gramsToDeduct = parseFloat(cb.getAttribute('data-grams')) || 0;
+        const invItem = appState.inventory.find(i => i.id === itemId);
+        if (invItem) {
+          invItem.stock = Math.max(0, invItem.stock - gramsToDeduct);
         }
       });
 
       sol.estado = 'APROBADO';
+      closeViewRequestModal();
       renderColaBodega();
       renderInventoryTable();
       updateDashboardMetrics();
-      showToast(`Lote ${idSol} despachado. Stock descontado con éxito de la planta de cárnicos.`, 'success');
+      showToast(`Solicitud ${idSol} despachada con éxito. Insumos descontados de Bodega Central.`, 'success');
+    }
+
+    function aprobarDespachoBodega(idSol) {
+      verSolicitudBodegaModal(idSol);
     }
 
     // Sincronizar el cargado inicial
