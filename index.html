@@ -689,7 +689,12 @@
                 <tbody class="divide-y divide-slate-200">
                   <!-- Dynamic JS content -->
                 </tbody>
-              </tabl        <!-- ================= PÁGINA 5: MÓDULO DE FORMULACIÓN Y DESPACHOS DE PRODUCCIÓN (BOM) ================= -->
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= PÁGINA 5: MÓDULO DE FORMULACIÓN Y DESPACHOS DE PRODUCCIÓN (BOM) ================= -->
         <div id="page-despachos" class="tab-content hidden space-y-6">
 
           <!-- ================= VISTA ESTUDIANTE ================= -->
@@ -1955,560 +1960,9 @@
     }
 
     // 8. PÁGINA 5: MÓDULO DE FORMULACIÓN DINÁMICA DE PRODUCCIÓN (BOM) Y APROBACIÓN DE BODEGA
-    
-    // Cálculo principal del Motor BOM según reglas exactas
-    function calculateFormulaBOM() {
-      const formulaSelect = document.getElementById('formProductSelect');
-      const kilosInput = document.getElementById('formKilosInput');
-      
-      if (!formulaSelect || !kilosInput) return;
+    let formulacionTemporal = []; 
 
-      const formulaId = formulaSelect.value;
-      const kilosToProduce = parseFloat(kilosInput.value) || 2.08;
-
-      const formulaObj = appState.formulas.find(f => f.id === formulaId);
-      if (!formulaObj) return;
-
-      // Base Batch: 2.08 Kg
-      const baseBatch = formulaObj.baseBatchKg || 2.08;
-      const scaleFactor = kilosToProduce / baseBatch;
-
-      // 1. CARNE DE POLLO (BASE_MAESTRA)
-      const carneBaseObj = formulaObj.ingredients.find(i => i.type === 'BASE_MAESTRA');
-      const carneGramosBase = carneBaseObj ? carneBaseObj.val : 1361;
-      const scaledCarne = carneGramosBase * scaleFactor;
-
-      // 2. GRASA (PCT_SOBRE_BASE) -> 27.61% de la carne
-      const grasaObj = formulaObj.ingredients.find(i => i.type === 'PCT_SOBRE_BASE');
-      const grasaPct = grasaObj ? grasaObj.val : 27.61;
-      const scaledGrasa = scaledCarne * (grasaPct / 100);
-
-      // 3. CERVEZA (PCT_SOBRE_CARNICO) -> 20.25% de (Carne + Grasa)
-      const cervezaObj = formulaObj.ingredients.find(i => i.type === 'PCT_SOBRE_CARNICO');
-      const cervezaPct = cervezaObj ? cervezaObj.val : 20.25;
-      const scaledCerveza = (scaledCarne + scaledGrasa) * (cervezaPct / 100);
-
-      // Generar líneas calculadas
-      activeFormulationLines = formulaObj.ingredients.map(ing => {
-        let calcQty = 0;
-        let ruleLabel = '';
-
-        if (ing.type === 'BASE_MAESTRA') {
-          calcQty = scaledCarne;
-          ruleLabel = `Base Maestra (${ing.val}g / 2.08Kg)`;
-        } else if (ing.type === 'PCT_SOBRE_BASE') {
-          calcQty = scaledGrasa;
-          ruleLabel = `${ing.val}% sobre Carne`;
-        } else if (ing.type === 'PCT_SOBRE_CARNICO') {
-          calcQty = scaledCerveza;
-          ruleLabel = `${ing.val}% sobre Cárnico (Carne+Grasa)`;
-        } else if (ing.type === 'GRAMOS_POR_KG_TOTAL') {
-          calcQty = ing.val * kilosToProduce;
-          ruleLabel = `${ing.val} g por Kg Total`;
-        } else if (ing.type === 'CANTIDAD_FIJA') {
-          calcQty = Math.round(ing.val * scaleFactor);
-          ruleLabel = `Cantidad Fija (${ing.val} unid / 2.08Kg)`;
-        }
-
-        // Search stock in Bodega Central
-        const invItem = appState.inventory.find(i => i.id === ing.itemId || i.name.toLowerCase() === ing.name.toLowerCase());
-        const stockAvail = invItem ? invItem.stock : 0;
-        const actualItemId = invItem ? invItem.id : ing.itemId;
-
-        return {
-          itemId: actualItemId,
-          name: ing.name,
-          typeRule: ruleLabel,
-          stockAvailable: stockAvail,
-          calculatedQty: parseFloat(calcQty.toFixed(2)),
-          qtyToUse: parseFloat(calcQty.toFixed(2)),
-          unit: ing.unit,
-          isExtra: false
-        };
-      });
-
-      renderFormulationTable();
-    }
-
-    // Render de la tabla del Interactive Grid de Formulación
-    function renderFormulationTable() {
-      const tbody = document.querySelector('#tablaDetalleFormulacion tbody');
-      if (!tbody) return;
-
-      if (activeFormulationLines.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-slate-400">No hay ingredientes cargados.</td></tr>';
-        return;
-      }
-
-      let html = '';
-      let totalTeoricoGramos = 0;
-      let totalEditableGramos = 0;
-
-      activeFormulationLines.forEach((line, idx) => {
-        const isLowStock = line.qtyToUse > line.stockAvailable;
-
-        if (line.unit === 'g') {
-          totalTeoricoGramos += line.calculatedQty;
-          totalEditableGramos += line.qtyToUse;
-        }
-
-        html += `
-          <tr class="${line.isExtra ? 'bg-amber-50/40' : ''}">
-            <td class="font-mono text-xs font-bold text-slate-500">${line.itemId}</td>
-            <td class="font-bold text-slate-800 flex items-center gap-1.5">
-              <span>${line.name}</span>
-              ${line.isExtra ? '<span class="text-[9px] bg-amber-200 text-amber-900 font-extrabold px-1 py-0.2 rounded">EXTRA</span>' : ''}
-            </td>
-            <td class="text-xs text-slate-600 font-medium">${line.typeRule}</td>
-            <td class="text-right font-mono font-bold ${isLowStock ? 'text-red-600' : 'text-slate-700'}">${line.stockAvailable.toFixed(2)}</td>
-            <td class="text-right font-mono text-slate-600 font-medium">${line.calculatedQty.toFixed(2)}</td>
-            <td class="text-right">
-              <input type="number" step="0.01" min="0" value="${line.qtyToUse}" oninput="updateLineQuantity(${idx}, this.value)" class="apex-input font-mono font-bold text-right text-upecGreen w-32 focus:ring-upecGreen">
-            </td>
-            <td class="font-semibold text-slate-600">${line.unit}</td>
-            <td class="text-center">
-              <button type="button" onclick="removeFormulaLine(${idx})" title="Eliminar ingrediente de la lista" class="text-red-500 hover:text-red-700 p-1">
-                <i class="fa-solid fa-trash-can"></i>
-              </button>
-            </td>
-          </tr>
-        `;
-      });
-
-      tbody.innerHTML = html;
-
-      // Actualizar totales de masa pre-embutido
-      document.getElementById('totalTeoricoDisplay').innerText = `${totalTeoricoGramos.toFixed(2)} g`;
-      document.getElementById('totalEditableDisplay').innerText = `${totalEditableGramos.toFixed(2)} g`;
-    }
-
-    function updateLineQuantity(idx, val) {
-      const parsed = parseFloat(val);
-      if (!isNaN(parsed) && parsed >= 0) {
-        activeFormulationLines[idx].qtyToUse = parsed;
-        
-        // Recalcular totales sin re-renderizar todo el DOM de los inputs
-        let totalTeoricoGramos = 0;
-        let totalEditableGramos = 0;
-        activeFormulationLines.forEach(l => {
-          if (l.unit === 'g') {
-            totalTeoricoGramos += l.calculatedQty;
-            totalEditableGramos += l.qtyToUse;
-          }
-        });
-        document.getElementById('totalTeoricoDisplay').innerText = `${totalTeoricoGramos.toFixed(2)} g`;
-        document.getElementById('totalEditableDisplay').innerText = `${totalEditableGramos.toFixed(2)} g`;
-      }
-    }
-
-    function removeFormulaLine(idx) {
-      const removedName = activeFormulationLines[idx].name;
-      activeFormulationLines.splice(idx, 1);
-      renderFormulationTable();
-      showToast(`Ingrediente "${removedName}" removido de la formulación activa`, 'info');
-    }
-
-    // Modal para Añadir Ingrediente Extra / Insumo Libre
-    function openAddExtraIngredientModal() {
-      const select = document.getElementById('extraItemSelect');
-      let html = '<option value="">-- Seleccionar Insumo/Material de Bodega --</option>';
-      
-      appState.inventory.forEach(item => {
-        html += `<option value="${item.id}">${item.name} (${item.plant}) - Stock: ${item.stock} ${item.unit}</option>`;
-      });
-
-      select.innerHTML = html;
-      document.getElementById('extraQtyInput').value = '';
-      document.getElementById('addExtraIngredientModal').classList.remove('hidden');
-    }
-
-    function closeAddExtraIngredientModal() {
-      document.getElementById('addExtraIngredientModal').classList.add('hidden');
-    }
-
-    function handleAddExtraIngredient(e) {
-      e.preventDefault();
-      const itemId = document.getElementById('extraItemSelect').value;
-      const qty = parseFloat(document.getElementById('extraQtyInput').value) || 0;
-
-      if (!itemId || qty <= 0) {
-        showToast('Seleccione un ítem y especifique una cantidad mayor a 0.', 'warning');
-        return;
-      }
-
-      const invItem = appState.inventory.find(i => i.id === itemId);
-      if (!invItem) return;
-
-      activeFormulationLines.push({
-        itemId: invItem.id,
-        name: invItem.name,
-        typeRule: 'EXTRA_PERSONALIZADO',
-        stockAvailable: invItem.stock,
-        calculatedQty: qty,
-        qtyToUse: qty,
-        unit: invItem.unit,
-        isExtra: true
-      });
-
-      closeAddExtraIngredientModal();
-      renderFormulationTable();
-      showToast(`Ingrediente extra "${invItem.name}" añadido a la receta`, 'success');
-    }
-
-    // Envío de Solicitud de Producción al Bodeguero
-    function handleSendProductionRequest() {
-      const kilosInput = document.getElementById('formKilosInput');
-      const studentInput = document.getElementById('formStudentInput');
-
-      const kilos = parseFloat(kilosInput.value) || 2.08;
-      const student = studentInput.value.trim();
-
-      if (!student) {
-        showToast('Por favor ingrese el nombre/cédula del estudiante solicitante.', 'warning');
-        return;
-      }
-
-      if (activeFormulationLines.length === 0) {
-        showToast('No hay ingredientes en la receta para solicitar.', 'warning');
-        return;
-      }
-
-      const newSolId = "SOL-00" + (appState.solicitudesProduccion.length + 1);
-      
-      const requestItems = activeFormulationLines.map(line => ({
-        itemId: line.itemId,
-        name: line.name,
-        calculatedQty: line.calculatedQty,
-        qtyToUse: line.qtyToUse,
-        unit: line.unit,
-        typeRule: line.typeRule
-      }));
-
-      appState.solicitudesProduccion.unshift({
-        id: newSolId,
-        productName: "Chorizo Picante Barrica del Diablo",
-        kilosToProduce: kilos,
-        applicant: student,
-        plant: "Planta Piloto de Procesamiento de Cárnicos",
-        date: SYSTEM_CURRENT_DATE,
-        status: "PENDIENTE",
-        items: requestItems
-      });
-
-      renderProductionRequestsTable();
-      showToast(`Solicitud de Producción ${newSolId} enviada a Bodega Central con éxito (Estado: PENDIENTE)`, 'success');
-    }
-
-    // Requerimiento UI 2: Panel del Bodeguero (Aprobación)
-    function renderProductionRequestsTable() {
-      const tbody = document.querySelector('#tablaSolicitudesProduccion tbody');
-      const countDisplay = document.getElementById('solicitudesCountDisplay');
-
-      if (!tbody) return;
-
-      if (countDisplay) {
-        countDisplay.innerText = `${appState.solicitudesProduccion.length} solicitudes`;
-      }
-
-      if (appState.solicitudesProduccion.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-slate-400">No hay solicitudes de producción en la cola de bodega.</td></tr>';
-        return;
-      }
-
-      let html = '';
-      appState.solicitudesProduccion.forEach(req => {
-        const isPending = req.status === 'PENDIENTE';
-        const badgeHtml = isPending 
-          ? '<span class="apex-badge-alert"><i class="fa-solid fa-clock"></i> PENDIENTE</span>' 
-          : '<span class="apex-badge-ok"><i class="fa-solid fa-check"></i> APROBADO</span>';
-
-        html += `
-          <tr>
-            <td class="font-mono text-xs font-bold text-slate-500">${req.id}</td>
-            <td class="font-bold text-slate-800">${req.productName}</td>
-            <td class="text-right font-mono font-bold text-upecGreen">${req.kilosToProduce.toFixed(2)} Kg</td>
-            <td class="text-slate-700 font-medium">${req.applicant}</td>
-            <td class="font-mono text-slate-500">${req.date}</td>
-            <td class="text-center font-mono font-bold text-slate-700">${req.items.length} items</td>
-            <td>${badgeHtml}</td>
-            <td class="text-center">
-              <button type="button" onclick="openViewRequestModal('${req.id}')" class="px-3 py-1 bg-upecGreen hover:bg-upecGreenDark text-white text-xs font-bold rounded shadow-xs flex items-center justify-center gap-1.5 mx-auto transition-colors">
-                <i class="fa-solid fa-eye text-upecYellow"></i>
-                <span>Ver Detalle y ${isPending ? 'Aprobar' : 'Ver'}</span>
-              </button>
-            </td>
-          </tr>
-        `;
-      });
-
-      tbody.innerHTML = html;
-    }
-
-    // Modal de Detalle y Aprobación de la Solicitud
-    let currentViewingRequestId = null;
-
-    function openViewRequestModal(solId) {
-      const req = appState.solicitudesProduccion.find(r => r.id === solId);
-      if (!req) return;
-
-      currentViewingRequestId = solId;
-
-      document.getElementById('viewRequestTitle').innerText = `Detalle de Solicitud - ${req.id}`;
-      document.getElementById('viewReqApplicant').innerText = req.applicant;
-      document.getElementById('viewReqProduct').innerText = req.productName;
-      document.getElementById('viewReqKilos').innerText = `${req.kilosToProduce.toFixed(2)} Kg`;
-
-      const isPending = req.status === 'PENDIENTE';
-      document.getElementById('viewReqStatus').innerHTML = isPending 
-        ? '<span class="apex-badge-alert"><i class="fa-solid fa-clock"></i> PENDIENTE</span>' 
-        : '<span class="apex-badge-ok"><i class="fa-solid fa-check"></i> APROBADO</span>';
-
-      const tbody = document.querySelector('#tablaDetalleViewRequest tbody');
-      let html = '';
-      let hasStockDeficit = false;
-
-      req.items.forEach(line => {
-        const invItem = appState.inventory.find(i => i.id === line.itemId || i.name.toLowerCase() === line.name.toLowerCase());
-        const stockAvail = invItem ? invItem.stock : 0;
-        const isSufficient = stockAvail >= line.qtyToUse;
-
-        if (!isSufficient && isPending) {
-          hasStockDeficit = true;
-        }
-
-        html += `
-          <tr>
-            <td class="font-mono text-slate-500 font-bold">${line.itemId}</td>
-            <td class="font-semibold text-slate-800">${line.name}</td>
-            <td class="text-right font-mono font-bold text-upecGreen">${line.qtyToUse.toFixed(2)}</td>
-            <td class="text-slate-600 font-medium">${line.unit}</td>
-            <td class="text-right font-mono font-bold ${!isSufficient && isPending ? 'text-red-600' : 'text-slate-700'}">${stockAvail.toFixed(2)}</td>
-            <td>
-              ${isSufficient 
-                ? '<span class="apex-badge-ok"><i class="fa-solid fa-check"></i> Suficiente</span>' 
-                : '<span class="apex-badge-caducado"><i class="fa-solid fa-triangle-exclamation"></i> Insuficiente</span>'}
-            </td>
-          </tr>
-        `;
-      });
-
-      tbody.innerHTML = html;
-
-      const actionsDiv = document.getElementById('viewRequestActionButtons');
-      if (isPending) {
-        actionsDiv.innerHTML = `
-          <button type="button" onclick="approveProductionRequest('${req.id}')" ${hasStockDeficit ? 'disabled' : ''} class="px-5 py-2 ${hasStockDeficit ? 'bg-slate-300 text-slate-500 cursor-not-allowed' : 'bg-upecGreen hover:bg-upecGreenDark text-white'} text-xs font-bold rounded shadow-xs flex items-center gap-1.5 transition-colors">
-            <i class="fa-solid fa-check-double text-upecYellow"></i>
-            <span>${hasStockDeficit ? 'Stock Insuficiente en Bodega' : 'Aprobar y Despachar Stock de Bodega'}</span>
-          </button>
-        `;
-      } else {
-        actionsDiv.innerHTML = '<span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded border border-emerald-200"><i class="fa-solid fa-circle-check"></i> Solicitud Aprobada y Stock Descontado</span>';
-      }
-
-      document.getElementById('viewRequestModal').classList.remove('hidden');
-    }
-
-    function closeViewRequestModal() {
-      document.getElementById('viewRequestModal').classList.add('hidden');
-      currentViewingRequestId = null;
-    }
-
-    // Aprobación y resta automática del inventario (Bodeguero Central)
-    function approveProductionRequest(solId) {
-      const req = appState.solicitudesProduccion.find(r => r.id === solId);
-      if (!req || req.status !== 'PENDIENTE') return;
-
-      // Verificar stock nuevamente
-      let canApprove = true;
-      let insufficientItem = '';
-
-      req.items.forEach(line => {
-        const invItem = appState.inventory.find(i => i.id === line.itemId || i.name.toLowerCase() === line.name.toLowerCase());
-        if (!invItem || invItem.stock < line.qtyToUse) {
-          canApprove = false;
-          insufficientItem = line.name;
-        }
-      });
-
-      if (!canApprove) {
-        showToast(`No se puede aprobar: Stock insuficiente para "${insufficientItem}"`, 'danger');
-        return;
-      }
-
-      // Restar del array inventory (stock -= cantidad_calculada / qtyToUse)
-      req.items.forEach(line => {
-        const invItem = appState.inventory.find(i => i.id === line.itemId || i.name.toLowerCase() === line.name.toLowerCase());
-        if (invItem) {
-          invItem.stock = Math.max(0, invItem.stock - line.qtyToUse);
-        }
-      });
-
-      // Cambiar estado a APROBADO
-      req.status = 'APROBADO';
-
-      // Registrar en el historial global de despachos para mantener compatibilidad
-      const newDspId = "DSP-00" + (appState.dispatches.length + 1);
-      appState.dispatches.unshift({
-        id: newDspId,
-        plant: req.plant,
-        item: `BOM Receta: ${req.productName} (${req.kilosToProduce} Kg) [Solicitud: ${req.id}]`,
-        qty: req.kilosToProduce,
-        recipient: req.applicant,
-        technician: "Bodeguero Central (APEX Auto-Approval)",
-        date: SYSTEM_CURRENT_DATE
-      });
-
-      closeViewRequestModal();
-      renderInventoryTable();
-      renderProductionRequestsTable();
-      renderDispatchHistoryTable();
-      updateDashboardMetrics();
-
-      showToast(`¡Solicitud ${req.id} APROBADA exitosamente! El stock fue descontado automáticamente de Bodega Central.`, 'success');
-    }
-
-    // Project Field control for Equipo
-    function handleProyectoChange() {
-      const pertenece = document.getElementById('newItemPerteneceProyecto').value;
-      const container = document.getElementById('sectionResponsableProyecto');
-      const input = document.getElementById('newItemResponsableProyecto');
-      
-      if (pertenece === 'Si') {
-        container.classList.remove('hidden');
-        input.required = true;
-      } else {
-        container.classList.add('hidden');
-        input.required = false;
-        input.value = '';
-      }
-    }
-
-    // Activo movement/traslado logic
-    function openTrasladoModal(eqId) {
-      const eq = appState.equipment.find(e => e.id === eqId);
-      if (!eq) return;
-      
-      document.getElementById('trasladoEqId').value = eqId;
-      document.getElementById('trasladoEqNameDisplay').innerText = `${eq.name} (${eq.codigoInst || eq.id})`;
-      
-      const destSelect = document.getElementById('trasladoPlantaDestino');
-      let html = '';
-      appState.plants.forEach(plant => {
-        html += `<option value="${plant}" ${plant === eq.plant ? 'selected' : ''}>${plant}</option>`;
-      });
-      destSelect.innerHTML = html;
-      
-      document.getElementById('trasladoArea').value = '';
-      document.getElementById('trasladoResponsable').value = '';
-      
-      document.getElementById('trasladoModal').classList.remove('hidden');
-    }
-
-    function closeTrasladoModal() {
-      document.getElementById('trasladoModal').classList.add('hidden');
-    }
-
-    function handleSaveTraslado(e) {
-      e.preventDefault();
-      const eqId = document.getElementById('trasladoEqId').value;
-      const targetPlant = document.getElementById('trasladoPlantaDestino').value;
-      const targetArea = document.getElementById('trasladoArea').value.trim();
-      const responsible = document.getElementById('trasladoResponsable').value.trim();
-
-      const eq = appState.equipment.find(e => e.id === eqId);
-      if (!eq) return;
-
-      const originPlant = eq.plant;
-      eq.plant = targetPlant;
-
-      const newMovId = "MOV-00" + (appState.movements.length + 1);
-      appState.movements.unshift({
-        id: newMovId,
-        eqName: eq.name,
-        origin: originPlant,
-        dest: targetPlant,
-        area: targetArea,
-        date: SYSTEM_CURRENT_DATE,
-        technician: responsible
-      });
-
-      closeTrasladoModal();
-      renderEquipmentCards();
-      renderMovementsTable();
-      showToast(`Traslado registrado y planta actualizada para ${eq.name}`, 'success');
-    }
-
-    function renderMovementsTable() {
-      const tbody = document.querySelector('#tablaMovimientosActivos tbody');
-      if (!tbody) return;
-
-      if (!appState.movements || appState.movements.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-slate-400">No hay registros de traslados.</td></tr>';
-        return;
-      }
-
-      let html = '';
-      appState.movements.forEach(m => {
-        html += `
-          <tr>
-            <td class="font-bold text-slate-800">${m.eqName}</td>
-            <td class="text-slate-600">${m.origin}</td>
-            <td class="font-semibold text-upecGreen">${m.dest}</td>
-            <td class="font-mono text-slate-700">${m.area}</td>
-            <td class="font-mono text-slate-500">${m.date}</td>
-            <td class="text-slate-700 font-medium">${m.technician}</td>
-          </tr>
-        `;
-      });
-      tbody.innerHTML = html;
-    }
-
-    function updateDispatchItemSelect() {
-      // Legacy compatibility wrapper
-    }
-
-    function calculateLiveDispatchPrice() {
-      // Legacy compatibility wrapper
-    }
-
-    function renderDispatchHistoryTable() {
-      // Legacy compatibility wrapper
-    }
-
-    // TOAST NOTIFICATIONS UTILITY
-    function showToast(message, type = 'info') {
-      const toast = document.getElementById('toast');
-      const toastContent = document.getElementById('toastContent');
-      const toastIcon = document.getElementById('toastIcon');
-      const toastMessage = document.getElementById('toastMessage');
-
-      toastMessage.innerText = message;
-
-      if (type === 'success') {
-        toastContent.className = "px-4 py-3 rounded shadow-xl text-xs font-bold flex items-center gap-2.5 text-white bg-upecGreen border border-emerald-400";
-        toastIcon.className = "fa-solid fa-circle-check text-base text-upecYellow";
-      } else if (type === 'warning') {
-        toastContent.className = "px-4 py-3 rounded shadow-xl text-xs font-bold flex items-center gap-2.5 text-amber-950 bg-upecYellow border border-amber-500";
-        toastIcon.className = "fa-solid fa-triangle-exclamation text-base text-amber-900";
-      } else if (type === 'danger') {
-        toastContent.className = "px-4 py-3 rounded shadow-xl text-xs font-bold flex items-center gap-2.5 text-white bg-red-600 border border-red-400";
-        toastIcon.className = "fa-solid fa-circle-exclamation text-base text-white";
-      } else {
-        toastContent.className = "px-4 py-3 rounded shadow-xl text-xs font-bold flex items-center gap-2.5 text-white bg-slate-800 border border-slate-700";
-        toastIcon.className = "fa-solid fa-circle-info text-base text-sky-400";
-      }
-
-      toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
-      
-      setTimeout(() => {
-        toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
-      }, 3500);
-    }
-
-    // ================= MOTOR DE FÓRMULAS DINÁMICO (ESTUDIANTE Y BODEGA) =================
-    let formulacionTemporal = [];
-
+    // Genera y escala la receta basándose en los kilos ingresados por el estudiante
     function generarFormulacion() {
       const kilosInput = parseFloat(document.getElementById('estudianteKilos').value);
       if (isNaN(kilosInput) || kilosInput <= 0) {
@@ -2516,7 +1970,9 @@
         return;
       }
 
-      const factorLote = kilosInput / 2.088; 
+      // Factor de escala basado en el lote maestro de Excel (2.08 Kg)
+      const factorLote = kilosInput / 2.08; 
+      
       const carne_pollo = 1361 * factorLote;
       const grasa = carne_pollo * 0.2761; 
       const masa_carnica = carne_pollo + grasa;
@@ -2525,36 +1981,55 @@
       const tripolifosfato = 0.30 * kilosInput;
       const sal = 10.32 * kilosInput;
       const sal_cura = 0.74 * kilosInput;
-      const especias = (4.12 + 4.12 + 2 + 7.23 + 2.06 + 12 + 1.55) * kilosInput; 
+      const ajo = 4.12 * kilosInput;
+      const pimienta = 4.12 * kilosInput;
+      const aji = 2.0 * kilosInput;
+      const paprika = 7.23 * kilosInput;
+      const cebolla = 2.06 * kilosInput;
+      const azucar = 12.0 * kilosInput;
+      const oregano = 1.55 * kilosInput;
 
+      // Estructura limpia para el Interactive Grid temporal del estudiante
       formulacionTemporal = [
-        { id: '1', ingrediente: 'Carne de Pollo', funcion: 'Base Maestra', gramos: carne_pollo },
-        { id: '2', ingrediente: 'Grasa', funcion: 'Emulsión', gramos: grasa },
-        { id: '3', ingrediente: 'Cerveza', funcion: 'Hidratación', gramos: cerveza },
-        { id: '4', ingrediente: 'Tripolifosfato de Sodio', funcion: 'Retención de Agua', gramos: tripolifosfato },
-        { id: '5', ingrediente: 'Sal Común', funcion: 'Sabor / Conservación', gramos: sal },
-        { id: '6', ingrediente: 'Sal de Cura', funcion: 'Color / Antimicrobiano', gramos: sal_cura },
-        { id: '7', ingrediente: 'Mix de Especias', funcion: 'Condimentos', gramos: especias }
+        { itemId: 'INV-107', ingrediente: 'Carne de Pollo', funcion: 'Base Maestra', gramos: carne_pollo, unit: 'g' },
+        { itemId: 'INV-108', ingrediente: 'Grasa de Cerdo / Tocino', funcion: 'Emulsión', gramos: grasa, unit: 'g' },
+        { itemId: 'INV-109', ingrediente: 'Cerveza Barrica del Diablo', funcion: 'Hidratación', gramos: cerveza, unit: 'g' },
+        { itemId: 'INV-110', ingrediente: 'Tripolifosfato de Sodio', funcion: 'Retención de Agua', gramos: tripolifosfato, unit: 'g' },
+        { itemId: 'INV-111', ingrediente: 'Sal Común', funcion: 'Sabor Base', gramos: sal, unit: 'g' },
+        { itemId: 'INV-112', ingrediente: 'Sal de Cura', funcion: 'Conservante Nitritado', gramos: sal_cura, unit: 'g' },
+        { itemId: 'INV-113', ingrediente: 'Ajo en Polvo', funcion: 'Condimento', gramos: ajo, unit: 'g' },
+        { itemId: 'INV-114', ingrediente: 'Pimienta Negra Molida', funcion: 'Condimento Picante', gramos: pimienta, unit: 'g' },
+        { itemId: 'INV-115', ingrediente: 'Ají en Polvo / Picante', funcion: 'Sabor Característico', gramos: aji, unit: 'g' },
+        { itemId: 'INV-116', ingrediente: 'Paprika Molida', funcion: 'Colorante Natural', gramos: paprika, unit: 'g' },
+        { itemId: 'INV-117', ingrediente: 'Cebolla en Polvo', funcion: 'Condimento', gramos: cebolla, unit: 'g' },
+        { itemId: 'INV-118', ingrediente: 'Azúcar Blanco', funcion: 'Balanceador', gramos: azucar, unit: 'g' },
+        { itemId: 'INV-119', ingrediente: 'Orégano Seco', funcion: 'Hierba Aromática', gramos: oregano, unit: 'g' },
+        { itemId: 'INV-120', ingrediente: 'Fundas para Embutido', funcion: 'Envoltura', gramos: Math.round(4 * factorLote), unit: 'Unidades' },
+        { itemId: 'INV-121', ingrediente: 'Hilo de Amarrar', funcion: 'Atado', gramos: Math.round(5 * factorLote), unit: 'Unidades' }
       ];
 
       renderTablaBOM();
       document.getElementById('regionFormulacion').classList.remove('hidden');
-      showToast('Formulación calculada matemáticamente', 'info');
+      showToast('Formulación escalada automáticamente desde el motor de reglas', 'info');
     }
 
+    // Renderiza las filas en modo "Interactive Grid" para que el estudiante pueda editar o eliminar
     function renderTablaBOM() {
       const tbody = document.getElementById('tablaBOM');
+      if (!tbody) return;
       let html = '';
+      
       formulacionTemporal.forEach((item, index) => {
         html += `
           <tr class="hover:bg-slate-50">
-            <td class="font-bold text-slate-800">${item.ingrediente}</td>
-            <td class="text-slate-500 italic">${item.funcion}</td>
-            <td class="text-right">
-              <input type="number" value="${item.gramos.toFixed(2)}" class="apex-input text-right font-mono w-24" onchange="actualizarGramos(${index}, this.value)"> g
+            <td class="py-2 px-3 font-bold text-slate-800">${item.ingrediente}</td>
+            <td class="py-2 px-3 text-slate-500 italic">${item.funcion}</td>
+            <td class="py-2 px-3 text-right">
+              <input type="number" step="0.01" value="${item.gramos.toFixed(2)}" class="apex-input text-right font-mono w-28 inline-block focus:border-upecGreen" onchange="actualizarGramosTemporal(${index}, this.value)">
+              <span class="ml-1 font-semibold text-slate-600">${item.unit}</span>
             </td>
-            <td class="text-center">
-              <button onclick="eliminarIngrediente(${index})" class="text-red-500 hover:text-red-700"><i class="fa-solid fa-trash"></i></button>
+            <td class="py-2 px-3 text-center">
+              <button type="button" onclick="eliminarIngredienteTemporal(${index})" class="text-red-500 hover:text-red-700" title="Eliminar"><i class="fa-solid fa-trash-can"></i></button>
             </td>
           </tr>
         `;
@@ -2562,88 +2037,130 @@
       tbody.innerHTML = html;
     }
 
-    function actualizarGramos(index, nuevoValor) {
-      formulacionTemporal[index].gramos = parseFloat(nuevoValor) || 0;
+    function actualizarGramosTemporal(index, valor) {
+      formulacionTemporal[index].gramos = parseFloat(valor) || 0;
     }
 
-    function eliminarIngrediente(index) {
+    function eliminarIngredienteTemporal(index) {
+      const name = formulacionTemporal[index].ingrediente;
       formulacionTemporal.splice(index, 1);
       renderTablaBOM();
+      showToast(`"${name}" removido de la orden actual`, 'info');
     }
 
     function agregarIngredienteExtra() {
       formulacionTemporal.push({
-        id: 'EX-' + Date.now(),
-        ingrediente: 'Nuevo Insumo Extra',
-        funcion: 'Insumo Adicional',
-        gramos: 0
+        itemId: 'INV-EXTRA',
+        ingrediente: 'Insumo Adicional / Extra Libre',
+        funcion: 'Personalización Estudiante',
+        gramos: 0,
+        unit: 'g'
       });
       renderTablaBOM();
-      showToast('Fila agregada. Modifique el nombre e ingrese los gramos.', 'success');
+      showToast('Fila en blanco añadida al final de la lista', 'success');
     }
 
+    // Envía la orden al panel de control de Bodega
     function enviarSolicitudBodega() {
       const nombre = document.getElementById('estudianteNombre').value.trim();
       const kilos = document.getElementById('estudianteKilos').value;
 
-      if (!nombre || formulacionTemporal.length === 0) {
-        showToast('Falta nombre del responsable o la fórmula está vacía', 'warning');
+      if (!nombre) {
+        showToast('Debe ingresar el nombre del estudiante responsable', 'warning');
+        return;
+      }
+      if (formulacionTemporal.length === 0) {
+        showToast('La lista de materiales está vacía', 'warning');
         return;
       }
 
       const idSolicitud = "BOM-00" + (appState.solicitudesBOM ? appState.solicitudesBOM.length + 1 : 1);
-      if(!appState.solicitudesBOM) appState.solicitudesBOM = [];
       
-      appState.solicitudesBOM.unshift({
+      appState.solicitudesBOM.push({
         id: idSolicitud,
         fecha: SYSTEM_CURRENT_DATE,
         estudiante: nombre,
-        producto: 'Chorizo Barrica del Diablo',
+        producto: 'Chorizo Picante "Barrica del Diablo"',
         kilos: kilos,
         estado: 'PENDIENTE',
         detalle: [...formulacionTemporal]
       });
 
+      // Resetear la interfaz del estudiante
       document.getElementById('regionFormulacion').classList.add('hidden');
       document.getElementById('estudianteNombre').value = '';
-      
+      formulacionTemporal = [];
+
       renderColaBodega();
-      showToast('Solicitud enviada a Bodega', 'success');
+      showToast(`Solicitud ${idSolicitud} enviada a la cola de aprobación de Bodega`, 'success');
     }
 
+    // Muestra las órdenes en la sección de Bodega Central
     function renderColaBodega() {
       const tbody = document.getElementById('tablaPendientesBodega');
-      if (!appState.solicitudesBOM || appState.solicitudesBOM.length === 0) return;
+      if (!tbody) return;
+
+      if (!appState.solicitudesBOM || appState.solicitudesBOM.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-slate-500 italic">No hay solicitudes pendientes.</td></tr>';
+        return;
+      }
 
       let html = '';
       appState.solicitudesBOM.forEach(sol => {
-        let badge = sol.estado === 'PENDIENTE' ? '<span class="apex-badge-alert">Pendiente</span>' : '<span class="apex-badge-ok">Aprobado</span>';
+        let badge = sol.estado === 'PENDIENTE' 
+          ? '<span class="apex-badge-alert"><i class="fa-solid fa-clock"></i> Pendiente</span>' 
+          : '<span class="apex-badge-ok"><i class="fa-solid fa-check"></i> Despachado</span>';
+        
         let botonAccion = sol.estado === 'PENDIENTE' 
-          ? `<button onclick="aprobarDespachoBodega('${sol.id}')" class="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[10px] font-bold shadow-xs"><i class="fa-solid fa-check"></i> Despachar</button>`
-          : '-';
+          ? `<button onclick="aprobarDespachoBodega('${sol.id}')" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[11px] font-bold shadow-xs transition-colors"><i class="fa-solid fa-check"></i> Despachar</button>`
+          : '<span class="text-slate-400 italic">Completado</span>';
 
         html += `
           <tr>
-            <td class="font-bold text-slate-800">${sol.id}</td>
-            <td class="text-slate-500">${sol.fecha}</td>
-            <td class="font-semibold">${sol.estudiante}</td>
-            <td>${sol.producto}</td>
-            <td class="font-mono text-center font-bold">${sol.kilos} Kg</td>
-            <td>${badge}</td>
-            <td class="text-center">${botonAccion}</td>
+            <td class="font-bold text-slate-800 py-2.5 px-3">${sol.id}</td>
+            <td class="text-slate-500 py-2.5 px-3">${sol.fecha}</td>
+            <td class="font-semibold py-2.5 px-3 text-slate-700">${sol.estudiante}</td>
+            <td class="py-2.5 px-3">${sol.producto}</td>
+            <td class="font-mono text-center font-bold text-upecGreen py-2.5 px-3">${sol.kilos} Kg</td>
+            <td class="py-2.5 px-3 text-center">${badge}</td>
+            <td class="text-center py-2.5 px-3">${botonAccion}</td>
           </tr>
         `;
       });
       tbody.innerHTML = html;
     }
 
+    // Procesa el despacho reduciendo las existencias reales en appState.inventory
     function aprobarDespachoBodega(idSol) {
       const solicitud = appState.solicitudesBOM.find(s => s.id === idSol);
-      if(solicitud) {
-        solicitud.estado = 'APROBADO';
-        renderColaBodega();
-        showToast('Despacho aprobado. Inventario descontado.', 'success');
-      }
+      if (!solicitud) return;
+
+      // Descontar del inventario general en memoria
+      solicitud.detalle.forEach(itemBOM => {
+        const itemInventario = appState.inventory.find(i => i.id === itemBOM.itemId);
+        if (itemInventario) {
+          itemInventario.stock = Math.max(0, itemInventario.stock - itemBOM.gramos);
+        }
+      });
+
+      solicitud.estado = 'APROBADO';
+      
+      renderColaBodega();
+      renderInventoryTable(); // Sincroniza los datos con la pestaña de Bodega Central
+      updateDashboardMetrics(); // Actualiza las alertas críticas del dashboard principal
+      showToast(`Despacho de la orden ${idSol} procesado. Inventario actualizado en tiempo real.`, 'success');
+    }
+
+    // Envolturas de compatibilidad legada
+    function updateDispatchItemSelect() {}
+    function calculateLiveDispatchPrice() {}
+    function renderDispatchHistoryTable() {}
+    function handleProyectoChange() {
+      const pertenece = document.getElementById('newItemPerteneceProyecto').value;
+      const container = document.getElementById('sectionResponsableProyecto');
+      const input = document.getElementById('newItemResponsableProyecto');
+      if (pertenece === 'Si') { container.classList.remove('hidden'); input.required = true; } 
+      else { container.classList.add('hidden'); input.required = false; input.value = ''; }
     }
   </script>
 </body>
