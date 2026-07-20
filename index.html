@@ -1293,12 +1293,8 @@
       renderIncidentsTable();
       renderInventoryTable();
       renderEquipmentCards();
-      renderDispatchHistoryTable();
-      updateDispatchItemSelect();
       updateDashboardMetrics();
       renderMovementsTable();
-      calculateFormulaBOM();
-      renderProductionRequestsTable();
     });
 
     // 1. TOGGLE SIDEBAR MENU
@@ -2100,6 +2096,26 @@
       showToast(`"${name}" removido. El peso total del lote se ha recalculado.`, 'warning');
     }
 
+    // Funciones de control de visibilidad del Modal 4 (Insumos Libres)
+    function openAddExtraIngredientModal() {
+      const select = document.getElementById('extraItemSelect');
+      if (!select) return;
+      
+      let html = '<option value="">-- Seleccionar Insumo de Bodega Central --</option>';
+      appState.inventory.forEach(item => {
+        if (item.category === 'Insumo') {
+          html += `<option value="${item.id}">${item.name} - Stock: ${item.stock} ${item.unit}</option>`;
+        }
+      });
+      select.innerHTML = html;
+      document.getElementById('extraQtyInput').value = '';
+      document.getElementById('addExtraIngredientModal').classList.remove('hidden');
+    }
+
+    function closeAddExtraIngredientModal() {
+      document.getElementById('addExtraIngredientModal').classList.add('hidden');
+    }
+
     // Abre el modal para añadir insumos libres desde la bodega central
     function agregarInsumoLibreModal() {
       openAddExtraIngredientModal(); 
@@ -2161,7 +2177,7 @@
         detalle: [...itemsFormulacion]
       });
 
-      // Limpiar y resetear
+      // Limpiar y resetear campos visuales
       document.getElementById('estudianteNombre').value = '';
       showToast(`Solicitud ${idSolicitud} enviada a Bodega Central`, 'success');
       renderColaBodega();
