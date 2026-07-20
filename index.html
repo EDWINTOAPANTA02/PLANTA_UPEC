@@ -766,7 +766,7 @@
               </div>
 
               <div class="flex justify-end pt-2">
-                <button onclick="enviarLoteABodega()" class="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-900 text-xs font-bold rounded shadow-md flex items-center gap-2 transition-colors">
+                <button type="button" onclick="enviarLoteABodega()" class="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-900 text-xs font-bold rounded shadow-md flex items-center gap-2 transition-colors">
                   <i class="fa-solid fa-paper-plane"></i> Enviar Solicitud de Despacho a Bodega
                 </button>
               </div>
@@ -1174,6 +1174,36 @@
   <script>
     // System Reference Date (Julio 2026)
     const SYSTEM_CURRENT_DATE = "2026-07-03";
+
+    // TOAST NOTIFICATION UTILITY
+    function showToast(message, type = 'info') {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMessage');
+      const toastIcon = document.getElementById('toastIcon');
+      if (!toast || !toastMsg) return;
+
+      toastMsg.innerText = message;
+
+      if (toastIcon) {
+        if (type === 'success') {
+          toastIcon.className = 'fa-solid fa-circle-check text-emerald-400 text-sm';
+        } else if (type === 'warning') {
+          toastIcon.className = 'fa-solid fa-triangle-exclamation text-upecYellow text-sm';
+        } else if (type === 'danger') {
+          toastIcon.className = 'fa-solid fa-circle-xmark text-red-400 text-sm';
+        } else {
+          toastIcon.className = 'fa-solid fa-circle-info text-blue-400 text-sm';
+        }
+      }
+
+      toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+      }, 3500);
+    }
 
     // IN-MEMORY DATA STORE
     let appState = {
