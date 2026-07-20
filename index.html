@@ -702,90 +702,100 @@
             <div class="t-Region-header bg-upecGreen/10">
               <div class="t-Region-title text-upecGreen">
                 <i class="fa-solid fa-user-graduate"></i>
-                <span>VISTA ESTUDIANTE: Solicitud de Producción (Motor Dinámico)</span>
+                <span>VISTA ESTUDIANTE: Formulación Reactiva (Filtro por Carne Base)</span>
               </div>
             </div>
             
-            <div class="t-Region-body space-y-4">
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50 p-4 rounded border border-slate-200">
+            <div class="t-Region-body space-y-4 p-4">
+              <!-- Bloque de Indicadores Superiores del Excel -->
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-900 text-white p-4 rounded shadow-sm font-mono text-xs">
+                <div class="p-2 bg-slate-800 rounded border border-slate-700">
+                  <span class="text-upecYellow block font-bold">PESO CARNE Y GRASA:</span>
+                  <span id="lblPesoCarneGrasa" class="text-lg font-bold">1736.77</span> g
+                </div>
+                <div class="p-2 bg-slate-800 rounded border border-slate-700">
+                  <span class="text-upecYellow block font-bold">PESO CERVEZA HIELO:</span>
+                  <span id="lblPesoCerveza" class="text-lg font-bold">351.70</span> g
+                </div>
+                <div class="p-2 bg-emerald-950 rounded border border-emerald-500">
+                  <span class="text-emerald-400 block font-bold">CANTIDAD TOTAL (KG):</span>
+                  <span id="lblCantidadTotalKg" class="text-xl font-bold text-emerald-300">2.09</span> Kg
+                </div>
+              </div>
+
+              <!-- Control de Entrada de la Carne Base -->
+              <div class="bg-white p-4 rounded border border-slate-200 shadow-xs grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                 <div>
-                  <label class="apex-label">1. Producto a Elaborar *</label>
-                  <select id="estudianteProducto" class="apex-input font-bold text-slate-800">
-                    <option value="chorizo_diablo">Chorizo Picante "Barrica del Diablo"</option>
-                  </select>
+                  <label class="apex-label font-bold text-upecGreen">Definir Carne de Pollo Base (Gramos) *</label>
+                  <input type="number" id="txtCarneBase" value="1361.00" step="0.01" oninput="recalcularFormulacionReactiva()" class="apex-input font-mono font-bold text-lg border-2 border-upecGreen">
                 </div>
                 <div>
-                  <label class="apex-label">2. Cantidad a Producir (Kg) *</label>
-                  <input type="number" id="estudianteKilos" value="2.08" step="0.01" min="0.5" class="apex-input font-mono font-bold text-upecGreen">
+                  <label class="apex-label">Estudiante / Responsable de Lote *</label>
+                  <input type="text" id="estudianteNombre" placeholder="Ej. ETOAPANTA" class="apex-input font-bold">
                 </div>
-                <div class="flex items-end">
-                  <button onclick="generarFormulacion()" class="w-full px-4 py-2 bg-upecGreen hover:bg-upecGreenDark text-white text-xs font-bold rounded shadow-xs flex justify-center items-center gap-2">
-                    <i class="fa-solid fa-calculator"></i> Generar Formulación
+                <div>
+                  <button type="button" onclick="agregarInsumoLibreModal()" class="w-full px-3 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded flex justify-center items-center gap-1.5 transition-colors">
+                    <i class="fa-solid fa-plus-circle text-upecYellow"></i> Añadir Insumo Libre
                   </button>
                 </div>
               </div>
 
-              <div id="regionFormulacion" class="hidden space-y-3">
-                <div class="flex justify-between items-center mt-4">
-                  <h3 class="font-bold text-sm text-slate-700"><i class="fa-solid fa-clipboard-list text-upecYellow"></i> Lista de Materiales (BOM)</h3>
-                  <button onclick="agregarIngredienteExtra()" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 text-[11px] font-bold rounded border border-slate-300 flex items-center gap-1">
-                    <i class="fa-solid fa-plus"></i> Añadir Extra
-                  </button>
-                </div>
-                
-                <div class="overflow-x-auto border border-slate-300 rounded">
-                  <table class="apex-table w-full text-xs">
-                    <thead>
-                      <tr>
-                        <th>Ingrediente / Insumo</th>
-                        <th>Función Técnica</th>
-                        <th class="text-right">Gramos Calculados</th>
-                        <th class="text-center">Acción</th>
-                      </tr>
-                    </thead>
-                    <tbody id="tablaBOM" class="divide-y divide-slate-200"></tbody>
-                  </table>
-                </div>
+              <!-- Interactive Grid Reactivo -->
+              <div class="overflow-x-auto border border-slate-300 rounded shadow-sm mt-4">
+                <table class="apex-table w-full text-xs" id="tableBOMReactiva">
+                  <thead>
+                    <tr class="bg-slate-100 text-slate-700">
+                      <th class="py-2 px-3">Ingrediente / Insumo</th>
+                      <th class="py-2 px-3 text-center">Tipo Regla Excel</th>
+                      <th class="py-2 px-3 text-right">Porcentaje / (g/Kg)</th>
+                      <th class="py-2 px-3 text-right">Gramos Totales</th>
+                      <th class="py-2 px-3 text-center">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbodyBOM" class="divide-y divide-slate-200 bg-white">
+                    <!-- JS inyectará las filas de forma reactiva -->
+                  </tbody>
+                  <tfoot>
+                    <tr class="bg-slate-900 text-white font-mono font-bold">
+                      <td colspan="3" class="py-2 px-3 text-right text-upecYellow">TOTAL FORMULACIÓN:</td>
+                      <td id="lblTotalGramosFinal" class="py-2 px-3 text-right text-lg text-emerald-400">2195.35 g</td>
+                      <td></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-                  <div>
-                    <label class="apex-label">Nombre del Estudiante / Responsable</label>
-                    <input type="text" id="estudianteNombre" placeholder="Ej. Juan Pérez" class="apex-input">
-                  </div>
-                  <div class="flex items-end justify-end">
-                    <button onclick="enviarSolicitudBodega()" class="px-6 py-2 bg-amber-500 hover:bg-amber-600 text-slate-900 text-xs font-bold rounded shadow-xs flex items-center gap-2">
-                      <i class="fa-solid fa-paper-plane"></i> Enviar a Bodega
-                    </button>
-                  </div>
-                </div>
+              <div class="flex justify-end pt-2">
+                <button onclick="enviarLoteABodega()" class="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-900 text-xs font-bold rounded shadow-md flex items-center gap-2 transition-colors">
+                  <i class="fa-solid fa-paper-plane"></i> Enviar Solicitud de Despacho a Bodega
+                </button>
               </div>
             </div>
           </div>
 
           <!-- ================= VISTA BODEGA ================= -->
-          <div class="t-Region border-2 border-slate-700 mt-8">
-            <div class="t-Region-header bg-slate-800">
-              <div class="t-Region-title text-white">
+          <div class="t-Region border-l-4 border-l-slate-700 shadow-md mt-6">
+            <div class="t-Region-header bg-slate-800 border-b border-slate-700">
+              <div class="t-Region-title text-white font-bold text-sm">
                 <i class="fa-solid fa-warehouse text-upecYellow"></i>
-                <span>VISTA BODEGA: Cola de Aprobación</span>
+                <span>VISTA BODEGA: Cola de Aprobación de Despachos</span>
               </div>
             </div>
             <div class="t-Region-body p-0">
               <div class="overflow-x-auto">
                 <table class="apex-table w-full text-xs">
                   <thead>
-                    <tr>
-                      <th>Nº Solicitud</th>
-                      <th>Fecha</th>
-                      <th>Estudiante</th>
-                      <th>Producto</th>
-                      <th>Kilos</th>
-                      <th>Estado</th>
-                      <th class="text-center">Acciones</th>
+                    <tr class="bg-slate-50">
+                      <th class="py-2 px-3">Nº Solicitud</th>
+                      <th class="py-2 px-3">Fecha</th>
+                      <th class="py-2 px-3">Estudiante</th>
+                      <th class="py-2 px-3 text-right">Kilos Lote</th>
+                      <th class="py-2 px-3 text-center">Estado</th>
+                      <th class="py-2 px-3 text-center">Acciones</th>
                     </tr>
                   </thead>
-                  <tbody id="tablaPendientesBodega" class="divide-y divide-slate-200">
-                    <tr><td colspan="7" class="text-center py-4 text-slate-500">No hay solicitudes pendientes.</td></tr>
+                  <tbody id="tablaPendientesBodega" class="divide-y divide-slate-200 bg-white">
+                    <tr><td colspan="6" class="text-center py-6 text-slate-500 italic">No hay solicitudes pendientes.</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -1959,209 +1969,255 @@
       }
     }
 
-    // 8. PÁGINA 5: MÓDULO DE FORMULACIÓN DINÁMICA DE PRODUCCIÓN (BOM) Y APROBACIÓN DE BODEGA
-    let formulacionTemporal = []; 
+    // =========================================================================
+    // MOTOR MAESTRO DE FORMULACIÓN REACTIVA BOTTOM-UP (CHORIZO BARRICA)
+    // =========================================================================
+    
+    // Lista base de ingredientes con sus coeficientes y reglas del Excel
+    let itemsFormulacion = [
+      { id: 'INV-107', name: 'Carne de Pollo', rule: 'BASE', factor: 100, grams: 1361.00, displayRule: '50.50% (Base)' },
+      { id: 'INV-108', name: 'Grasa de Cerdo / Tocino', rule: 'PCT_CARNE', factor: 27.61, grams: 375.77, displayRule: '27.61% de Carne' },
+      { id: 'INV-109', name: 'Cerveza Barrica del Diablo', rule: 'PCT_CARNE_GRASA', factor: 20.25, grams: 351.70, displayRule: '20.25% de (Carne+Grasa)' },
+      { id: 'INV-110', name: 'Tripolifosfato de Sodio', rule: 'G_KG_TOTAL', factor: 0.30, grams: 0.63, displayRule: '0.30 g/Kg Total' },
+      { id: 'INV-111', name: 'Sal Común', rule: 'G_KG_TOTAL', factor: 10.32, grams: 21.55, displayRule: '10.32 g/Kg Total' },
+      { id: 'INV-112', name: 'Sal de Cura', rule: 'G_KG_TOTAL', factor: 0.74, grams: 1.55, displayRule: '0.74 g/Kg Total' },
+      { id: 'INV-113', name: 'Ajo en Polvo', rule: 'G_KG_TOTAL', factor: 4.12, grams: 8.60, displayRule: '4.12 g/Kg Total' },
+      { id: 'INV-114', name: 'Pimienta Negra Molida', rule: 'G_KG_TOTAL', factor: 4.12, grams: 8.60, displayRule: '4.12 g/Kg Total' },
+      { id: 'INV-115', name: 'Ají en Polvo / Picante', rule: 'G_KG_TOTAL', factor: 2.00, grams: 4.18, displayRule: '2.00 g/Kg Total' },
+      { id: 'INV-116', name: 'Paprika Molida', rule: 'G_KG_TOTAL', factor: 7.23, grams: 15.10, displayRule: '7.23 g/Kg Total' },
+      { id: 'INV-117', name: 'Cebolla en Polvo', rule: 'G_KG_TOTAL', factor: 2.06, grams: 4.30, displayRule: '2.06 g/Kg Total' },
+      { id: 'INV-118', name: 'Azúcar Blanco', rule: 'G_KG_TOTAL', factor: 12.00, grams: 25.06, displayRule: '12.00 g/Kg Total' },
+      { id: 'INV-119', name: 'Orégano Seco', rule: 'G_KG_TOTAL', factor: 1.55, grams: 3.24, displayRule: '1.55 g/Kg Total' },
+      { id: 'INV-120', name: 'Salsa Bbq', rule: 'FIXED', factor: 0, grams: 10.80, displayRule: 'Cantidad Fija Lote' },
+      { id: 'INV-121', name: 'Ahumatodo líquido', rule: 'FIXED', factor: 0, grams: 3.27, displayRule: 'Cantidad Fija Lote' }
+    ];
 
-    // Genera y escala la receta basándose en los kilos ingresados por el estudiante
-    function generarFormulacion() {
-      const kilosInput = parseFloat(document.getElementById('estudianteKilos').value);
-      if (isNaN(kilosInput) || kilosInput <= 0) {
-        showToast('Ingrese una cantidad válida en Kilos', 'warning');
-        return;
-      }
-
-      // Factor de escala basado en el lote maestro de Excel (2.08 Kg)
-      const factorLote = kilosInput / 2.08; 
-      
-      const carne_pollo = 1361 * factorLote;
-      const grasa = carne_pollo * 0.2761; 
-      const masa_carnica = carne_pollo + grasa;
-      const cerveza = masa_carnica * 0.2025; 
-
-      const tripolifosfato = 0.30 * kilosInput;
-      const sal = 10.32 * kilosInput;
-      const sal_cura = 0.74 * kilosInput;
-      const ajo = 4.12 * kilosInput;
-      const pimienta = 4.12 * kilosInput;
-      const aji = 2.0 * kilosInput;
-      const paprika = 7.23 * kilosInput;
-      const cebolla = 2.06 * kilosInput;
-      const azucar = 12.0 * kilosInput;
-      const oregano = 1.55 * kilosInput;
-
-      // Estructura limpia para el Interactive Grid temporal del estudiante
-      formulacionTemporal = [
-        { itemId: 'INV-107', ingrediente: 'Carne de Pollo', funcion: 'Base Maestra', gramos: carne_pollo, unit: 'g' },
-        { itemId: 'INV-108', ingrediente: 'Grasa de Cerdo / Tocino', funcion: 'Emulsión', gramos: grasa, unit: 'g' },
-        { itemId: 'INV-109', ingrediente: 'Cerveza Barrica del Diablo', funcion: 'Hidratación', gramos: cerveza, unit: 'g' },
-        { itemId: 'INV-110', ingrediente: 'Tripolifosfato de Sodio', funcion: 'Retención de Agua', gramos: tripolifosfato, unit: 'g' },
-        { itemId: 'INV-111', ingrediente: 'Sal Común', funcion: 'Sabor Base', gramos: sal, unit: 'g' },
-        { itemId: 'INV-112', ingrediente: 'Sal de Cura', funcion: 'Conservante Nitritado', gramos: sal_cura, unit: 'g' },
-        { itemId: 'INV-113', ingrediente: 'Ajo en Polvo', funcion: 'Condimento', gramos: ajo, unit: 'g' },
-        { itemId: 'INV-114', ingrediente: 'Pimienta Negra Molida', funcion: 'Condimento Picante', gramos: pimienta, unit: 'g' },
-        { itemId: 'INV-115', ingrediente: 'Ají en Polvo / Picante', funcion: 'Sabor Característico', gramos: aji, unit: 'g' },
-        { itemId: 'INV-116', ingrediente: 'Paprika Molida', funcion: 'Colorante Natural', gramos: paprika, unit: 'g' },
-        { itemId: 'INV-117', ingrediente: 'Cebolla en Polvo', funcion: 'Condimento', gramos: cebolla, unit: 'g' },
-        { itemId: 'INV-118', ingrediente: 'Azúcar Blanco', funcion: 'Balanceador', gramos: azucar, unit: 'g' },
-        { itemId: 'INV-119', ingrediente: 'Orégano Seco', funcion: 'Hierba Aromática', gramos: oregano, unit: 'g' },
-        { itemId: 'INV-120', ingrediente: 'Fundas para Embutido', funcion: 'Envoltura', gramos: Math.round(4 * factorLote), unit: 'Unidades' },
-        { itemId: 'INV-121', ingrediente: 'Hilo de Amarrar', funcion: 'Atado', gramos: Math.round(5 * factorLote), unit: 'Unidades' }
-      ];
-
-      renderTablaBOM();
-      document.getElementById('regionFormulacion').classList.remove('hidden');
-      showToast('Formulación escalada automáticamente desde el motor de reglas', 'info');
+    // Se ejecuta al cargar la página para sincronizar la primera vista
+    function initModuloDespachos() {
+      recalcularFormulacionReactiva();
+      renderColaBodega();
     }
 
-    // Renderiza las filas en modo "Interactive Grid" para que el estudiante pueda editar o eliminar
-    function renderTablaBOM() {
-      const tbody = document.getElementById('tablaBOM');
+    // El corazón matemático del Excel replicado en JS
+    function recalcularFormulacionReactiva() {
+      const txtCarne = document.getElementById('txtCarneBase');
+      if (!txtCarne) return;
+
+      let carneBase = parseFloat(txtCarne.value) || 0;
+
+      // 1. Encontrar y fijar los gramos de la carne de pollo
+      const rowCarne = itemsFormulacion.find(i => i.rule === 'BASE');
+      if (rowCarne) rowCarne.grams = carneBase;
+
+      // 2. Calcular Grasa (si existe en la lista y no se ha puesto en 0)
+      const rowGrasa = itemsFormulacion.find(i => i.id === 'INV-108');
+      let grasaGramos = 0;
+      if (rowGrasa) {
+        grasaGramos = carneBase * (rowGrasa.factor / 100);
+        rowGrasa.grams = grasaGramos;
+      }
+
+      // Peso acumulado carne + grasa
+      let pesoCarneGrasa = carneBase + grasaGramos;
+      document.getElementById('lblPesoCarneGrasa').innerText = pesoCarneGrasa.toFixed(2);
+
+      // 3. Calcular Cerveza (20.25% sobre la suma de carne y grasa)
+      const rowCerveza = itemsFormulacion.find(i => i.id === 'INV-109');
+      let cervezaGramos = 0;
+      if (rowCerveza) {
+        cervezaGramos = pesoCarneGrasa * (rowCerveza.factor / 100);
+        rowCerveza.grams = cervezaGramos;
+      }
+      document.getElementById('lblPesoCerveza').innerText = cervezaGramos.toFixed(2);
+
+      // 4. Calcular la Cantidad Total provisional en Kg (Carne + Grasa + Cerveza)
+      let cantidadTotalKg = (pesoCarneGrasa + cervezaGramos) / 1000;
+      document.getElementById('lblCantidadTotalKg').innerText = cantidadTotalKg.toFixed(2);
+
+      // 5. Calcular Aditivos y condimentos basados en g/Kg de esa Cantidad Total
+      itemsFormulacion.forEach(item => {
+        if (item.rule === 'G_KG_TOTAL') {
+          item.grams = item.factor * cantidadTotalKg;
+        }
+      });
+
+      // 6. Renderizar las filas en la tabla y calcular el Gran Total absoluto
+      renderTablaBOMReactiva();
+    }
+
+    function renderTablaBOMReactiva() {
+      const tbody = document.getElementById('tbodyBOM');
       if (!tbody) return;
+
       let html = '';
-      
-      formulacionTemporal.forEach((item, index) => {
+      let granTotalGramos = 0;
+
+      itemsFormulacion.forEach((item, index) => {
+        granTotalGramos += item.grams;
+        
         html += `
-          <tr class="hover:bg-slate-50">
-            <td class="py-2 px-3 font-bold text-slate-800">${item.ingrediente}</td>
-            <td class="py-2 px-3 text-slate-500 italic">${item.funcion}</td>
-            <td class="py-2 px-3 text-right">
-              <input type="number" step="0.01" value="${item.gramos.toFixed(2)}" class="apex-input text-right font-mono w-28 inline-block focus:border-upecGreen" onchange="actualizarGramosTemporal(${index}, this.value)">
-              <span class="ml-1 font-semibold text-slate-600">${item.unit}</span>
+          <tr class="hover:bg-slate-50 transition-colors">
+            <td class="py-2 px-3 font-bold text-slate-800">
+              <span class="text-xs font-mono text-slate-400 block">${item.id}</span>
+              ${item.name}
+            </td>
+            <td class="py-2 px-3 text-center text-slate-500 font-medium">${item.displayRule}</td>
+            <td class="py-2 px-3 text-right font-mono">
+              ${item.rule === 'FIXED' ? '-' : `
+                <input type="number" step="0.01" value="${item.factor}" 
+                  class="apex-input text-right font-mono w-20 p-1 inline-block" 
+                  oninput="updateItemFactor(${index}, this.value)">
+              `}
+            </td>
+            <td class="py-2 px-3 text-right font-mono font-bold text-upecGreen">
+              ${item.grams.toFixed(2)} g
             </td>
             <td class="py-2 px-3 text-center">
-              <button type="button" onclick="eliminarIngredienteTemporal(${index})" class="text-red-500 hover:text-red-700" title="Eliminar"><i class="fa-solid fa-trash-can"></i></button>
+              <button type="button" onclick="eliminarFilaFormulacion(${index})" class="text-red-500 hover:text-red-700 p-1" title="Quitar ingrediente del lote"><i class="fa-solid fa-trash-can"></i></button>
             </td>
           </tr>
         `;
       });
+
       tbody.innerHTML = html;
+      document.getElementById('lblTotalGramosFinal').innerText = granTotalGramos.toFixed(2) + " g";
     }
 
-    function actualizarGramosTemporal(index, valor) {
-      formulacionTemporal[index].gramos = parseFloat(valor) || 0;
+    // Permite cambiar porcentajes o relaciones g/Kg sobre la marcha
+    function updateItemFactor(index, value) {
+      itemsFormulacion[index].factor = parseFloat(value) || 0;
+      if (itemsFormulacion[index].rule === 'BASE') {
+        document.getElementById('txtCarneBase').value = value;
+      }
+      recalcularFormulacionReactiva();
     }
 
-    function eliminarIngredienteTemporal(index) {
-      const name = formulacionTemporal[index].ingrediente;
-      formulacionTemporal.splice(index, 1);
-      renderTablaBOM();
-      showToast(`"${name}" removido de la orden actual`, 'info');
+    // Cumple el requerimiento: "al momento de quitar un producto los kg cambian"
+    function eliminarFilaFormulacion(index) {
+      const name = itemsFormulacion[index].name;
+      itemsFormulacion.splice(index, 1);
+      recalcularFormulacionReactiva();
+      showToast(`"${name}" removido. El peso total del lote se ha recalculado.`, 'warning');
     }
 
-    function agregarIngredienteExtra() {
-      formulacionTemporal.push({
-        itemId: 'INV-EXTRA',
-        ingrediente: 'Insumo Adicional / Extra Libre',
-        funcion: 'Personalización Estudiante',
-        gramos: 0,
-        unit: 'g'
-      });
-      renderTablaBOM();
-      showToast('Fila en blanco añadida al final de la lista', 'success');
+    // Abre el modal para añadir insumos libres desde la bodega central
+    function agregarInsumoLibreModal() {
+      openAddExtraIngredientModal(); 
     }
 
-    // Envía la orden al panel de control de Bodega
-    function enviarSolicitudBodega() {
-      const nombre = document.getElementById('estudianteNombre').value.trim();
-      const kilos = document.getElementById('estudianteKilos').value;
+    // Esta función es llamada desde el modal para inyectar el ingrediente extra
+    function handleAddExtraIngredient(e) {
+      e.preventDefault();
+      const itemId = document.getElementById('extraItemSelect').value;
+      const qty = parseFloat(document.getElementById('extraQtyInput').value) || 0;
 
-      if (!nombre) {
-        showToast('Debe ingresar el nombre del estudiante responsable', 'warning');
+      if (!itemId || qty <= 0) {
+        showToast('Seleccione un ítem e ingrese los gramos.', 'warning');
         return;
       }
-      if (formulacionTemporal.length === 0) {
-        showToast('La lista de materiales está vacía', 'warning');
+
+      const invItem = appState.inventory.find(i => i.id === itemId);
+      if (!invItem) return;
+
+      // Inyectar como un factor FIXED (Cantidad absoluta agregada por el alumno)
+      itemsFormulacion.push({
+        id: invItem.id,
+        name: invItem.name,
+        rule: 'FIXED',
+        factor: 0,
+        grams: qty,
+        displayRule: 'Añadido por Estudiante'
+      });
+
+      closeAddExtraIngredientModal();
+      recalcularFormulacionReactiva();
+      showToast(`"${invItem.name}" agregado a la mezcla.`, 'success');
+    }
+
+    // Envía la orden armada a la bandeja del bodeguero
+    function enviarLoteABodega() {
+      const nombre = document.getElementById('estudianteNombre').value.trim();
+      const totalKg = parseFloat(document.getElementById('lblCantidadTotalKg').innerText);
+
+      if (!nombre) {
+        showToast('Ingrese el nombre del estudiante responsable de la práctica', 'warning');
+        return;
+      }
+      if (itemsFormulacion.length === 0) {
+        showToast('No hay elementos en la orden', 'danger');
         return;
       }
 
       const idSolicitud = "BOM-00" + (appState.solicitudesBOM ? appState.solicitudesBOM.length + 1 : 1);
-      
-      appState.solicitudesBOM.push({
+      if (!appState.solicitudesBOM) appState.solicitudesBOM = [];
+
+      appState.solicitudesBOM.unshift({
         id: idSolicitud,
         fecha: SYSTEM_CURRENT_DATE,
         estudiante: nombre,
-        producto: 'Chorizo Picante "Barrica del Diablo"',
-        kilos: kilos,
+        producto: 'Chorizo Picante Barrica del Diablo',
+        kilos: totalKg,
         estado: 'PENDIENTE',
-        detalle: [...formulacionTemporal]
+        detalle: [...itemsFormulacion]
       });
 
-      // Resetear la interfaz del estudiante
-      document.getElementById('regionFormulacion').classList.add('hidden');
+      // Limpiar y resetear
       document.getElementById('estudianteNombre').value = '';
-      formulacionTemporal = [];
-
+      showToast(`Solicitud ${idSolicitud} enviada a Bodega Central`, 'success');
       renderColaBodega();
-      showToast(`Solicitud ${idSolicitud} enviada a la cola de aprobación de Bodega`, 'success');
     }
 
-    // Muestra las órdenes en la sección de Bodega Central
     function renderColaBodega() {
       const tbody = document.getElementById('tablaPendientesBodega');
       if (!tbody) return;
 
       if (!appState.solicitudesBOM || appState.solicitudesBOM.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-slate-500 italic">No hay solicitudes pendientes.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-slate-500 italic">No hay solicitudes pendientes.</td></tr>';
         return;
       }
 
       let html = '';
       appState.solicitudesBOM.forEach(sol => {
-        let badge = sol.estado === 'PENDIENTE' 
-          ? '<span class="apex-badge-alert"><i class="fa-solid fa-clock"></i> Pendiente</span>' 
-          : '<span class="apex-badge-ok"><i class="fa-solid fa-check"></i> Despachado</span>';
-        
-        let botonAccion = sol.estado === 'PENDIENTE' 
-          ? `<button onclick="aprobarDespachoBodega('${sol.id}')" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[11px] font-bold shadow-xs transition-colors"><i class="fa-solid fa-check"></i> Despachar</button>`
-          : '<span class="text-slate-400 italic">Completado</span>';
+        let badge = sol.estado === 'PENDIENTE' ? '<span class="apex-badge-alert">Pendiente</span>' : '<span class="apex-badge-ok">Despachado</span>';
+        let boton = sol.estado === 'PENDIENTE' 
+          ? `<button onclick="aprobarDespachoBodega('${sol.id}')" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded text-[11px] transition-colors"><i class="fa-solid fa-check"></i> Despachar</button>`
+          : '<span class="text-slate-400 italic">Entregado</span>';
 
         html += `
           <tr>
-            <td class="font-bold text-slate-800 py-2.5 px-3">${sol.id}</td>
-            <td class="text-slate-500 py-2.5 px-3">${sol.fecha}</td>
-            <td class="font-semibold py-2.5 px-3 text-slate-700">${sol.estudiante}</td>
-            <td class="py-2.5 px-3">${sol.producto}</td>
-            <td class="font-mono text-center font-bold text-upecGreen py-2.5 px-3">${sol.kilos} Kg</td>
-            <td class="py-2.5 px-3 text-center">${badge}</td>
-            <td class="text-center py-2.5 px-3">${botonAccion}</td>
+            <td class="font-bold text-slate-800 py-2 px-3">${sol.id}</td>
+            <td class="text-slate-500 py-2 px-3">${sol.fecha}</td>
+            <td class="font-semibold py-2 px-3">${sol.estudiante}</td>
+            <td class="font-mono text-right font-bold text-upecGreen py-2 px-3">${sol.kilos.toFixed(2)} Kg</td>
+            <td class="text-center py-2 px-3">${badge}</td>
+            <td class="text-center py-2 px-3">${boton}</td>
           </tr>
         `;
       });
       tbody.innerHTML = html;
     }
 
-    // Procesa el despacho reduciendo las existencias reales en appState.inventory
     function aprobarDespachoBodega(idSol) {
-      const solicitud = appState.solicitudesBOM.find(s => s.id === idSol);
-      if (!solicitud) return;
+      const sol = appState.solicitudesBOM.find(s => s.id === idSol);
+      if (!sol) return;
 
-      // Descontar del inventario general en memoria
-      solicitud.detalle.forEach(itemBOM => {
-        const itemInventario = appState.inventory.find(i => i.id === itemBOM.itemId);
-        if (itemInventario) {
-          itemInventario.stock = Math.max(0, itemInventario.stock - itemBOM.gramos);
+      // Descontar las existencias físicas reales de la bodega central
+      sol.detalle.forEach(itemBOM => {
+        const itemInv = appState.inventory.find(i => i.id === itemBOM.id);
+        if (itemInv) {
+          itemInv.stock = Math.max(0, itemInv.stock - itemBOM.grams);
         }
       });
 
-      solicitud.estado = 'APROBADO';
-      
+      sol.estado = 'APROBADO';
       renderColaBodega();
-      renderInventoryTable(); // Sincroniza los datos con la pestaña de Bodega Central
-      updateDashboardMetrics(); // Actualiza las alertas críticas del dashboard principal
-      showToast(`Despacho de la orden ${idSol} procesado. Inventario actualizado en tiempo real.`, 'success');
+      renderInventoryTable();
+      updateDashboardMetrics();
+      showToast(`Lote ${idSol} despachado. Stock descontado con éxito de la planta de cárnicos.`, 'success');
     }
 
-    // Envolturas de compatibilidad legada
-    function updateDispatchItemSelect() {}
-    function calculateLiveDispatchPrice() {}
-    function renderDispatchHistoryTable() {}
-    function handleProyectoChange() {
-      const pertenece = document.getElementById('newItemPerteneceProyecto').value;
-      const container = document.getElementById('sectionResponsableProyecto');
-      const input = document.getElementById('newItemResponsableProyecto');
-      if (pertenece === 'Si') { container.classList.remove('hidden'); input.required = true; } 
-      else { container.classList.add('hidden'); input.required = false; input.value = ''; }
-    }
+    // Sincronizar el cargado inicial
+    setTimeout(initModuloDespachos, 100);
   </script>
 </body>
 </html>
