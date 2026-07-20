@@ -708,7 +708,7 @@
             
             <div class="t-Region-body space-y-4 p-4">
               <!-- Bloque de Indicadores Superiores del Excel -->
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-900 text-white p-4 rounded shadow-sm font-mono text-xs">
+              <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 bg-slate-900 text-white p-4 rounded shadow-sm font-mono text-xs">
                 <div class="p-2 bg-slate-800 rounded border border-slate-700">
                   <span class="text-upecYellow block font-bold">PESO CARNE Y GRASA:</span>
                   <span id="lblPesoCarneGrasa" class="text-lg font-bold">1736.77</span> g
@@ -720,6 +720,10 @@
                 <div class="p-2 bg-emerald-950 rounded border border-emerald-500">
                   <span class="text-emerald-400 block font-bold">CANTIDAD TOTAL (KG):</span>
                   <span id="lblCantidadTotalKg" class="text-xl font-bold text-emerald-300">2.09</span> Kg
+                </div>
+                <div class="p-2 bg-amber-950 rounded border border-amber-500">
+                  <span class="text-upecYellow block font-bold">TOTAL ESTIMADO ($):</span>
+                  <span id="lblTotalCobrarDolares" class="text-xl font-bold text-upecYellow">$ 0.00</span>
                 </div>
               </div>
 
@@ -749,6 +753,8 @@
                       <th class="py-2 px-3 text-center">Tipo Regla Excel</th>
                       <th class="py-2 px-3 text-right">Porcentaje / (g/Kg)</th>
                       <th class="py-2 px-3 text-right">Gramos Totales</th>
+                      <th class="py-2 px-3 text-right">Precio Unit. ($)</th>
+                      <th class="py-2 px-3 text-right">Subtotal ($)</th>
                       <th class="py-2 px-3 text-center">Acciones</th>
                     </tr>
                   </thead>
@@ -758,7 +764,9 @@
                   <tfoot>
                     <tr class="bg-slate-900 text-white font-mono font-bold">
                       <td colspan="3" class="py-2 px-3 text-right text-upecYellow">TOTAL FORMULACIÓN:</td>
-                      <td id="lblTotalGramosFinal" class="py-2 px-3 text-right text-lg text-emerald-400">2195.35 g</td>
+                      <td id="lblTotalGramosFinal" class="py-2 px-3 text-right text-base text-emerald-400">2195.35 g</td>
+                      <td class="py-2 px-3 text-right text-upecYellow">VALOR LOTE ($):</td>
+                      <td id="lblTotalDolaresFinal" class="py-2 px-3 text-right text-lg text-upecYellow">$ 0.00</td>
                       <td></td>
                     </tr>
                   </tfoot>
@@ -790,12 +798,13 @@
                       <th class="py-2 px-3">Fecha</th>
                       <th class="py-2 px-3">Estudiante</th>
                       <th class="py-2 px-3 text-right">Kilos Lote</th>
+                      <th class="py-2 px-3 text-right">Total a Cobrar ($)</th>
                       <th class="py-2 px-3 text-center">Estado</th>
                       <th class="py-2 px-3 text-center">Acciones</th>
                     </tr>
                   </thead>
                   <tbody id="tablaPendientesBodega" class="divide-y divide-slate-200 bg-white">
-                    <tr><td colspan="6" class="text-center py-6 text-slate-500 italic">No hay solicitudes pendientes.</td></tr>
+                    <tr><td colspan="7" class="text-center py-6 text-slate-500 italic">No hay solicitudes pendientes.</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -1098,7 +1107,7 @@
 
   <!-- MODAL 5: DETALLE Y APROBACIÓN DE SOLICITUD DE BODEGA -->
   <div id="viewRequestModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center hidden">
-    <div class="bg-white rounded-md shadow-2xl w-full max-w-2xl border border-slate-300 overflow-hidden">
+    <div class="bg-white rounded-md shadow-2xl w-full max-w-3xl border border-slate-300 overflow-hidden">
       <div class="bg-upecGreen text-white px-4 py-3 flex items-center justify-between">
         <h3 class="font-bold text-sm flex items-center gap-2">
           <i class="fa-solid fa-clipboard-check text-upecYellow"></i> <span id="viewRequestTitle">Detalle de Solicitud de Producción</span>
@@ -1110,7 +1119,7 @@
 
       <div class="p-5 space-y-4">
         <!-- Metadata Header -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-3 rounded border border-slate-200 text-xs">
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 bg-slate-50 p-3 rounded border border-slate-200 text-xs">
           <div>
             <span class="text-slate-500 block font-medium">Solicitante:</span>
             <span id="viewReqApplicant" class="font-bold text-slate-800"></span>
@@ -1120,8 +1129,12 @@
             <span id="viewReqProduct" class="font-bold text-upecGreen"></span>
           </div>
           <div>
-            <span class="text-slate-500 block font-medium">Kilos:</span>
+            <span class="text-slate-500 block font-medium">Kilos Lote:</span>
             <span id="viewReqKilos" class="font-bold font-mono text-slate-800"></span>
+          </div>
+          <div>
+            <span class="text-amber-700 block font-bold">Total a Cobrar:</span>
+            <span id="viewReqTotalCobrar" class="font-bold font-mono text-base text-amber-600">$ 0.00</span>
           </div>
           <div>
             <span class="text-slate-500 block font-medium">Estado:</span>
@@ -1130,21 +1143,30 @@
         </div>
 
         <!-- Ingredients Table -->
-        <div class="max-h-60 overflow-y-auto">
-          <table class="apex-table text-xs" id="tablaDetalleViewRequest">
+        <div class="max-h-64 overflow-y-auto border border-slate-200 rounded">
+          <table class="apex-table text-xs w-full" id="tablaDetalleViewRequest">
             <thead>
-              <tr>
-                <th>Código</th>
-                <th>Insumo / Material</th>
-                <th class="text-right">Cant. Requerida</th>
-                <th>Unidad</th>
-                <th class="text-right">Stock Disponible</th>
-                <th>Estado Stock</th>
+              <tr class="bg-slate-100">
+                <th class="py-2 px-2 text-center">Entregar</th>
+                <th class="py-2 px-2">Código</th>
+                <th class="py-2 px-2">Insumo / Material</th>
+                <th class="py-2 px-2 text-right">Requerido</th>
+                <th class="py-2 px-2 text-right">Precio Unit. ($)</th>
+                <th class="py-2 px-2 text-right">Subtotal ($)</th>
+                <th class="py-2 px-2 text-right">Stock Bodega</th>
+                <th class="py-2 px-2 text-center">Estado Stock</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-200">
+            <tbody class="divide-y divide-slate-200 bg-white">
               <!-- Dynamic JS content -->
             </tbody>
+            <tfoot>
+              <tr class="bg-slate-900 text-white font-mono font-bold">
+                <td colspan="5" class="py-2 px-3 text-right text-upecYellow">TOTAL INSUMOS SELECCIONADOS A COBRAR:</td>
+                <td id="lblModalTotalCobrarFinal" class="py-2 px-3 text-right text-base text-emerald-400">$ 0.00</td>
+                <td colspan="2"></td>
+              </tr>
+            </tfoot>
           </table>
         </div>
 
@@ -2047,7 +2069,8 @@
 
       // Peso acumulado carne + grasa
       let pesoCarneGrasa = carneBase + grasaGramos;
-      document.getElementById('lblPesoCarneGrasa').innerText = pesoCarneGrasa.toFixed(2);
+      const lblPesoCarneGrasa = document.getElementById('lblPesoCarneGrasa');
+      if (lblPesoCarneGrasa) lblPesoCarneGrasa.innerText = pesoCarneGrasa.toFixed(2);
 
       // 3. Calcular Cerveza (20.25% sobre la suma de carne y grasa)
       const rowCerveza = itemsFormulacion.find(i => i.id === 'INV-109');
@@ -2056,11 +2079,13 @@
         cervezaGramos = pesoCarneGrasa * (rowCerveza.factor / 100);
         rowCerveza.grams = cervezaGramos;
       }
-      document.getElementById('lblPesoCerveza').innerText = cervezaGramos.toFixed(2);
+      const lblPesoCerveza = document.getElementById('lblPesoCerveza');
+      if (lblPesoCerveza) lblPesoCerveza.innerText = cervezaGramos.toFixed(2);
 
       // 4. Calcular la Cantidad Total provisional en Kg (Carne + Grasa + Cerveza)
       let cantidadTotalKg = (pesoCarneGrasa + cervezaGramos) / 1000;
-      document.getElementById('lblCantidadTotalKg').innerText = cantidadTotalKg.toFixed(2);
+      const lblCantidadTotalKg = document.getElementById('lblCantidadTotalKg');
+      if (lblCantidadTotalKg) lblCantidadTotalKg.innerText = cantidadTotalKg.toFixed(2);
 
       // 5. Calcular Aditivos y condimentos basados en g/Kg de esa Cantidad Total
       itemsFormulacion.forEach(item => {
@@ -2079,9 +2104,15 @@
 
       let html = '';
       let granTotalGramos = 0;
+      let granTotalDolares = 0;
 
       itemsFormulacion.forEach((item, index) => {
         granTotalGramos += item.grams;
+
+        const invItem = appState.inventory.find(i => i.id === item.id || i.name.toLowerCase() === item.name.toLowerCase());
+        const precioUnit = invItem ? (invItem.price || 0) : 0;
+        const subtotal = item.grams * precioUnit;
+        granTotalDolares += subtotal;
         
         html += `
           <tr class="hover:bg-slate-50 transition-colors">
@@ -2100,6 +2131,12 @@
             <td class="py-2 px-3 text-right font-mono font-bold text-upecGreen">
               ${item.grams.toFixed(2)} g
             </td>
+            <td class="py-2 px-3 text-right font-mono text-slate-600">
+              $${precioUnit.toFixed(4)}
+            </td>
+            <td class="py-2 px-3 text-right font-mono font-bold text-amber-700">
+              $${subtotal.toFixed(2)}
+            </td>
             <td class="py-2 px-3 text-center">
               <button type="button" onclick="eliminarFilaFormulacion(${index})" class="text-red-500 hover:text-red-700 p-1" title="Quitar ingrediente del lote"><i class="fa-solid fa-trash-can"></i></button>
             </td>
@@ -2108,14 +2145,23 @@
       });
 
       tbody.innerHTML = html;
-      document.getElementById('lblTotalGramosFinal').innerText = granTotalGramos.toFixed(2) + " g";
+
+      const lblTotalGramos = document.getElementById('lblTotalGramosFinal');
+      if (lblTotalGramos) lblTotalGramos.innerText = granTotalGramos.toFixed(2) + " g";
+
+      const lblTotalDolares = document.getElementById('lblTotalDolaresFinal');
+      if (lblTotalDolares) lblTotalDolares.innerText = "$ " + granTotalDolares.toFixed(2);
+
+      const lblUpperTotalDolares = document.getElementById('lblTotalCobrarDolares');
+      if (lblUpperTotalDolares) lblUpperTotalDolares.innerText = "$ " + granTotalDolares.toFixed(2);
     }
 
     // Permite cambiar porcentajes o relaciones g/Kg sobre la marcha
     function updateItemFactor(index, value) {
       itemsFormulacion[index].factor = parseFloat(value) || 0;
       if (itemsFormulacion[index].rule === 'BASE') {
-        document.getElementById('txtCarneBase').value = value;
+        const txtCarne = document.getElementById('txtCarneBase');
+        if (txtCarne) txtCarne.value = value;
       }
       recalcularFormulacionReactiva();
     }
@@ -2125,7 +2171,7 @@
       const name = itemsFormulacion[index].name;
       itemsFormulacion.splice(index, 1);
       recalcularFormulacionReactiva();
-      showToast(`"${name}" removido. El peso total del lote se ha recalculado.`, 'warning');
+      showToast(`"${name}" removido. El peso total del lote y costos se han recalculado.`, 'warning');
     }
 
     // Funciones de control de visibilidad del Modal 4 (Insumos Libres)
@@ -2136,11 +2182,12 @@
       let html = '';
       appState.inventory.forEach(item => {
         if (item.category === 'Insumo') {
-          html += `<option value="${item.id}">${item.name} - Stock: ${item.stock} ${item.unit}</option>`;
+          html += `<option value="${item.id}">${item.name} - Stock: ${item.stock} ${item.unit} ($${item.price}/${item.unit})</option>`;
         }
       });
       select.innerHTML = html || '<option value="INV-107">Carne de Pollo Extra</option>';
-      document.getElementById('extraQtyInput').value = '50.00';
+      const qtyInput = document.getElementById('extraQtyInput');
+      if (qtyInput) qtyInput.value = '50.00';
       document.getElementById('addExtraIngredientModal').classList.remove('hidden');
     }
 
@@ -2202,6 +2249,13 @@
       const totalKgElem = document.getElementById('lblCantidadTotalKg');
       const totalKg = totalKgElem ? (parseFloat(totalKgElem.innerText) || 2.09) : 2.09;
 
+      let totalCobrar = 0;
+      itemsFormulacion.forEach(item => {
+        const invItem = appState.inventory.find(i => i.id === item.id || i.name.toLowerCase() === item.name.toLowerCase());
+        const precioUnit = invItem ? (invItem.price || 0) : 0;
+        totalCobrar += item.grams * precioUnit;
+      });
+
       if (!appState.solicitudesBOM) appState.solicitudesBOM = [];
       const idSolicitud = "BOM-00" + (appState.solicitudesBOM.length + 1);
 
@@ -2211,11 +2265,12 @@
         estudiante: nombre,
         producto: 'Chorizo Picante Barrica del Diablo',
         kilos: totalKg,
+        totalCobrar: totalCobrar,
         estado: 'PENDIENTE',
         detalle: itemsFormulacion.map(i => ({ ...i }))
       });
 
-      showToast(`Solicitud ${idSolicitud} enviada con éxito a Bodega Central`, 'success');
+      showToast(`Solicitud ${idSolicitud} enviada a Bodega Central. Total a cobrar: $${totalCobrar.toFixed(2)}`, 'success');
       renderColaBodega();
     }
 
@@ -2224,7 +2279,7 @@
       if (!tbody) return;
 
       if (!appState.solicitudesBOM || appState.solicitudesBOM.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-slate-500 italic">No hay solicitudes pendientes.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-6 text-slate-500 italic">No hay solicitudes pendientes.</td></tr>';
         return;
       }
 
@@ -2237,6 +2292,16 @@
 
         const kilosNum = typeof sol.kilos === 'number' ? sol.kilos : parseFloat(sol.kilos);
         const kilosStr = (!isNaN(kilosNum) ? kilosNum : 0).toFixed(2);
+        
+        // Calcular total a cobrar si no viene guardado
+        let valTotal = typeof sol.totalCobrar === 'number' ? sol.totalCobrar : 0;
+        if (!valTotal && sol.detalle) {
+          sol.detalle.forEach(item => {
+            const invItem = appState.inventory.find(i => i.id === item.id || i.name.toLowerCase() === item.name.toLowerCase());
+            valTotal += (item.grams || 0) * (invItem ? (invItem.price || 0) : 0);
+          });
+          sol.totalCobrar = valTotal;
+        }
 
         html += `
           <tr class="hover:bg-slate-50 transition-colors">
@@ -2244,6 +2309,7 @@
             <td class="text-slate-500 py-2 px-3">${sol.fecha}</td>
             <td class="font-semibold py-2 px-3 text-slate-800">${sol.estudiante}</td>
             <td class="font-mono text-right font-bold text-upecGreen py-2 px-3">${kilosStr} Kg</td>
+            <td class="font-mono text-right font-bold text-amber-700 py-2 px-3">$${valTotal.toFixed(2)}</td>
             <td class="text-center py-2 px-3">${badge}</td>
             <td class="text-center py-2 px-3">${boton}</td>
           </tr>
@@ -2252,7 +2318,7 @@
       tbody.innerHTML = html;
     }
 
-    // Modal 5: Abre la inspección detallada de la receta pedida por el alumno
+    // Modal 5: Abre la inspección detallada de la receta pedida por el alumno con Total a Cobrar
     function verSolicitudBodegaModal(idSol) {
       const sol = appState.solicitudesBOM.find(s => s.id === idSol);
       if (!sol) return;
@@ -2267,15 +2333,17 @@
         statusSpan.innerHTML = sol.estado === 'PENDIENTE' ? '<span class="apex-badge-alert">PENDIENTE</span>' : '<span class="apex-badge-ok">DESPACHADO</span>';
       }
 
-      // Renderizar tabla de insumos pedidos por el estudiante
+      // Renderizar tabla de insumos pedidos por el estudiante con precios y subtotales
       const tbody = document.querySelector('#tablaDetalleViewRequest tbody');
       if (tbody) {
         let html = '';
         sol.detalle.forEach((item, idx) => {
           const invItem = appState.inventory.find(i => i.id === item.id || i.name.toLowerCase() === item.name.toLowerCase());
           const stockActual = invItem ? invItem.stock : 0;
+          const precioUnit = invItem ? (invItem.price || 0) : 0;
           const unidad = invItem ? invItem.unit : (item.unit || 'g');
           const itemGrams = item.grams || 0;
+          const subtotal = itemGrams * precioUnit;
           
           let stockBadge = stockActual >= itemGrams 
             ? '<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded">Suficiente</span>'
@@ -2283,13 +2351,14 @@
 
           html += `
             <tr class="hover:bg-slate-50">
-              <td class="py-2 px-3">
-                <input type="checkbox" id="chk_item_${idx}" value="${item.id}" data-grams="${itemGrams}" class="item-despacho-cb rounded text-upecGreen focus:ring-upecGreen" ${sol.estado === 'PENDIENTE' ? 'checked' : 'disabled'}>
+              <td class="py-2 px-3 text-center">
+                <input type="checkbox" id="chk_item_${idx}" value="${item.id}" data-grams="${itemGrams}" data-subtotal="${subtotal}" onchange="recalcularTotalModalBodega()" class="item-despacho-cb rounded text-upecGreen focus:ring-upecGreen" ${sol.estado === 'PENDIENTE' ? 'checked' : 'disabled'}>
               </td>
               <td class="py-2 px-3 font-mono font-bold text-slate-700">${item.id}</td>
               <td class="py-2 px-3 font-semibold text-slate-800">${item.name}</td>
-              <td class="py-2 px-3 text-right font-mono font-bold text-upecGreen">${itemGrams.toFixed(2)}</td>
-              <td class="py-2 px-3 text-slate-500 font-medium">${unidad}</td>
+              <td class="py-2 px-3 text-right font-mono font-bold text-upecGreen">${itemGrams.toFixed(2)} ${unidad}</td>
+              <td class="py-2 px-3 text-right font-mono text-slate-600">$${precioUnit.toFixed(4)}</td>
+              <td class="py-2 px-3 text-right font-mono font-bold text-amber-700">$${subtotal.toFixed(2)}</td>
               <td class="py-2 px-3 text-right font-mono font-bold text-slate-700">${stockActual.toFixed(2)} ${unidad}</td>
               <td class="py-2 px-3 text-center">${stockBadge}</td>
             </tr>
@@ -2297,6 +2366,8 @@
         });
         tbody.innerHTML = html;
       }
+
+      recalcularTotalModalBodega();
 
       // Renderizar botones de acción según el estado
       const actionsDiv = document.getElementById('viewRequestActionButtons');
@@ -2319,6 +2390,22 @@
       document.getElementById('viewRequestModal').classList.remove('hidden');
     }
 
+    function recalcularTotalModalBodega() {
+      const checkboxes = document.querySelectorAll('.item-despacho-cb:checked');
+      let totalCobrar = 0;
+
+      checkboxes.forEach(cb => {
+        const subtotal = parseFloat(cb.getAttribute('data-subtotal')) || 0;
+        totalCobrar += subtotal;
+      });
+
+      const spanHeader = document.getElementById('viewReqTotalCobrar');
+      if (spanHeader) spanHeader.innerText = "$ " + totalCobrar.toFixed(2);
+
+      const spanFooter = document.getElementById('lblModalTotalCobrarFinal');
+      if (spanFooter) spanFooter.innerText = "$ " + totalCobrar.toFixed(2);
+    }
+
     function closeViewRequestModal() {
       document.getElementById('viewRequestModal').classList.add('hidden');
     }
@@ -2334,21 +2421,27 @@
         return;
       }
 
+      let totalCobradoFinal = 0;
       checkboxes.forEach(cb => {
         const itemId = cb.value;
         const gramsToDeduct = parseFloat(cb.getAttribute('data-grams')) || 0;
+        const subtotal = parseFloat(cb.getAttribute('data-subtotal')) || 0;
+        totalCobradoFinal += subtotal;
+
         const invItem = appState.inventory.find(i => i.id === itemId);
         if (invItem) {
           invItem.stock = Math.max(0, invItem.stock - gramsToDeduct);
         }
       });
 
+      sol.totalCobrar = totalCobradoFinal;
       sol.estado = 'APROBADO';
+      
       closeViewRequestModal();
       renderColaBodega();
       renderInventoryTable();
       updateDashboardMetrics();
-      showToast(`Solicitud ${idSol} despachada con éxito. Insumos descontados de Bodega Central.`, 'success');
+      showToast(`Solicitud ${idSol} despachada con éxito. Total cobrado: $${totalCobradoFinal.toFixed(2)}. Stock descontado.`, 'success');
     }
 
     function aprobarDespachoBodega(idSol) {
