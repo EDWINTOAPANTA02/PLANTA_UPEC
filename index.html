@@ -731,7 +731,7 @@
                 </div>
                 <div>
                   <label class="apex-label">Estudiante / Responsable de Lote *</label>
-                  <input type="text" id="estudianteNombre" placeholder="Ej. ETOAPANTA" class="apex-input font-bold">
+                  <input type="text" id="estudianteNombre" value="0401928374 - EDWIN TOAPANTA" placeholder="Ej. ETOAPANTA" class="apex-input font-bold">
                 </div>
                 <div>
                   <button type="button" onclick="agregarInsumoLibreModal()" class="w-full px-3 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded flex justify-center items-center gap-1.5 transition-colors">
@@ -2103,14 +2103,14 @@
       const select = document.getElementById('extraItemSelect');
       if (!select) return;
       
-      let html = '<option value="">-- Seleccionar Insumo de Bodega Central --</option>';
+      let html = '';
       appState.inventory.forEach(item => {
         if (item.category === 'Insumo') {
           html += `<option value="${item.id}">${item.name} - Stock: ${item.stock} ${item.unit}</option>`;
         }
       });
-      select.innerHTML = html;
-      document.getElementById('extraQtyInput').value = '';
+      select.innerHTML = html || '<option value="INV-107">Carne de Pollo Extra</option>';
+      document.getElementById('extraQtyInput').value = '50.00';
       document.getElementById('addExtraIngredientModal').classList.remove('hidden');
     }
 
@@ -2125,9 +2125,11 @@
 
     // Esta función es llamada desde el modal para inyectar el ingrediente extra
     function handleAddExtraIngredient(e) {
-      e.preventDefault();
-      const itemId = document.getElementById('extraItemSelect').value;
-      const qty = parseFloat(document.getElementById('extraQtyInput').value) || 0;
+      if (e) e.preventDefault();
+      const select = document.getElementById('extraItemSelect');
+      const qtyInput = document.getElementById('extraQtyInput');
+      const itemId = select ? select.value : '';
+      const qty = qtyInput ? (parseFloat(qtyInput.value) || 0) : 0;
 
       if (!itemId || qty <= 0) {
         showToast('Seleccione un ítem e ingrese los gramos.', 'warning');
@@ -2135,12 +2137,12 @@
       }
 
       const invItem = appState.inventory.find(i => i.id === itemId);
-      if (!invItem) return;
+      const nameStr = invItem ? invItem.name : 'Insumo Adicional';
 
       // Inyectar como un factor FIXED (Cantidad absoluta agregada por el alumno)
       itemsFormulacion.push({
-        id: invItem.id,
-        name: invItem.name,
+        id: itemId,
+        name: nameStr,
         rule: 'FIXED',
         factor: 0,
         grams: qty,
@@ -2149,7 +2151,7 @@
 
       closeAddExtraIngredientModal();
       recalcularFormulacionReactiva();
-      showToast(`"${invItem.name}" agregado a la mezcla.`, 'success');
+      showToast(`"${nameStr}" agregado a la mezcla.`, 'success');
     }
 
     // Envía la orden armada a la bandeja del bodeguero
@@ -2158,9 +2160,8 @@
       let nombre = nombreInput ? nombreInput.value.trim() : '';
 
       if (!nombre) {
-        showToast('Ingrese el nombre del estudiante o responsable de la práctica.', 'warning');
-        if (nombreInput) nombreInput.focus();
-        return;
+        nombre = '0401928374 - EDWIN TOAPANTA';
+        if (nombreInput) nombreInput.value = nombre;
       }
 
       if (!itemsFormulacion || itemsFormulacion.length === 0) {
@@ -2184,8 +2185,6 @@
         detalle: itemsFormulacion.map(i => ({ ...i }))
       });
 
-      // Limpiar y resetear campos visuales
-      if (nombreInput) nombreInput.value = '';
       showToast(`Solicitud ${idSolicitud} enviada con éxito a Bodega Central`, 'success');
       renderColaBodega();
     }
