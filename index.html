@@ -702,7 +702,7 @@
             <div class="t-Region-header bg-upecGreen/10">
               <div class="t-Region-title text-upecGreen">
                 <i class="fa-solid fa-user-graduate"></i>
-                <span>VISTA ESTUDIANTE: Formulación Reactiva (Filtro por Carne Base)</span>
+                <span>VISTA ESTUDIANTE: Motor Dinámico de Formulación & MRP (Selección por Producto)</span>
               </div>
             </div>
             
@@ -710,15 +710,15 @@
               <!-- Bloque de Indicadores Superiores del Excel -->
               <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 bg-slate-900 text-white p-4 rounded shadow-sm font-mono text-xs">
                 <div class="p-2 bg-slate-800 rounded border border-slate-700">
-                  <span class="text-upecYellow block font-bold">PESO CARNE Y GRASA:</span>
+                  <span class="text-upecYellow block font-bold" id="lblCardHeader1">PESO CARNE Y GRASA:</span>
                   <span id="lblPesoCarneGrasa" class="text-lg font-bold">1736.77</span> g
                 </div>
                 <div class="p-2 bg-slate-800 rounded border border-slate-700">
-                  <span class="text-upecYellow block font-bold">PESO CERVEZA HIELO:</span>
+                  <span class="text-upecYellow block font-bold" id="lblCardHeader2">PESO CERVEZA HIELO:</span>
                   <span id="lblPesoCerveza" class="text-lg font-bold">351.70</span> g
                 </div>
                 <div class="p-2 bg-emerald-950 rounded border border-emerald-500">
-                  <span class="text-emerald-400 block font-bold">CANTIDAD TOTAL (KG):</span>
+                  <span class="text-emerald-400 block font-bold">CANTIDAD TOTAL (LOTE):</span>
                   <span id="lblCantidadTotalKg" class="text-xl font-bold text-emerald-300">2.09</span> Kg
                 </div>
                 <div class="p-2 bg-amber-950 rounded border border-amber-500">
@@ -727,10 +727,17 @@
                 </div>
               </div>
 
-              <!-- Control de Entrada de la Carne Base -->
-              <div class="bg-white p-4 rounded border border-slate-200 shadow-xs grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+              <!-- Control de Entrada Dinámico de Producto y Materia Base -->
+              <div class="bg-white p-4 rounded border border-slate-200 shadow-xs grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                 <div>
-                  <label class="apex-label font-bold text-upecGreen">Definir Carne de Pollo Base (Gramos) *</label>
+                  <label class="apex-label font-bold text-slate-700">1. Seleccionar Producto (Fórmula DB) *</label>
+                  <select id="selectProductoBOM" onchange="cargarFormulaProducto(this.value)" class="apex-input font-bold text-upecGreen">
+                    <option value="FORM-CHORIZO">Chorizo Picante "Barrica del Diablo" (Planta Cárnicos)</option>
+                    <option value="FORM-QUESO">Queso Fresco Pasteurizado UPEC (Planta Lácteos)</option>
+                  </select>
+                </div>
+                <div>
+                  <label id="lblBaseIngrediente" class="apex-label font-bold text-upecGreen">Carne de Pollo Base (Gramos) *</label>
                   <input type="number" id="txtCarneBase" value="1361.00" step="0.01" oninput="recalcularFormulacionReactiva()" class="apex-input font-mono font-bold text-lg border-2 border-upecGreen">
                 </div>
                 <div>
@@ -1263,7 +1270,11 @@
         { id: "INV-118", plant: "Planta Piloto de Procesamiento de Cárnicos", category: "Insumo", name: "Azúcar Blanco", stock: 5000.00, unit: "g", expiry: "2027-06-30", cost: 0.002, price: 0.003, notes: "Balanceador de sabor" },
         { id: "INV-119", plant: "Planta Piloto de Procesamiento de Cárnicos", category: "Insumo", name: "Orégano Seco", stock: 5000.00, unit: "g", expiry: "2026-12-01", cost: 0.012, price: 0.018, notes: "Hierba aromática" },
         { id: "INV-120", plant: "Planta Piloto de Procesamiento de Cárnicos", category: "Material", name: "Fundas para Embutido", stock: 500.00, unit: "Unidades", expiry: "S/F", cost: 0, price: 0, notes: "Envoltura de tripa" },
-        { id: "INV-121", plant: "Planta Piloto de Procesamiento de Cárnicos", category: "Material", name: "Hilo de Amarrar", stock: 500.00, unit: "Unidades", expiry: "S/F", cost: 0, price: 0, notes: "Atado de embutido" }
+        { id: "INV-121", plant: "Planta Piloto de Procesamiento de Cárnicos", category: "Material", name: "Hilo de Amarrar", stock: 500.00, unit: "Unidades", expiry: "S/F", cost: 0, price: 0, notes: "Atado de embutido" },
+        // INSUMOS RECETA QUESO FRESCO PASTEURIZADO UPEC
+        { id: "INV-122", plant: "Planta Piloto de Lácteos y Quesos", category: "Insumo", name: "Leche Cruda Entera de Vaca", stock: 500.00, unit: "L", expiry: "2026-07-06", cost: 0.45, price: 0.55, notes: "Materia prima láctea" },
+        { id: "INV-123", plant: "Planta Piloto de Lácteos y Quesos", category: "Insumo", name: "Cloruro de Calcio Grado Alimenticio", stock: 5000.00, unit: "g", expiry: "2027-08-10", cost: 0.012, price: 0.015, notes: "Aditivo coagulante" },
+        { id: "INV-124", plant: "Planta Piloto de Lácteos y Quesos", category: "Insumo", name: "Cuajo Líquido Fuerza 1:10000", stock: 2000.00, unit: "ml", expiry: "2026-12-15", cost: 0.020, price: 0.030, notes: "Enzima coagulante" }
       ],
       formulas: [
         {
@@ -1272,21 +1283,33 @@
           baseBatchKg: 2.08,
           plant: "Planta Piloto de Procesamiento de Cárnicos",
           ingredients: [
-            { itemId: "INV-107", name: "Carne de Pollo", type: "BASE_MAESTRA", val: 1361, unit: "g" },
-            { itemId: "INV-108", name: "Grasa de Cerdo / Tocino", type: "PCT_SOBRE_BASE", val: 27.61, unit: "g" },
-            { itemId: "INV-109", name: "Cerveza Barrica del Diablo", type: "PCT_SOBRE_CARNICO", val: 20.25, unit: "g" },
-            { itemId: "INV-110", name: "Tripolifosfato de Sodio", type: "GRAMOS_POR_KG_TOTAL", val: 0.3, unit: "g" },
-            { itemId: "INV-111", name: "Sal Común", type: "GRAMOS_POR_KG_TOTAL", val: 10.32, unit: "g" },
-            { itemId: "INV-112", name: "Sal de Cura", type: "GRAMOS_POR_KG_TOTAL", val: 0.74, unit: "g" },
-            { itemId: "INV-113", name: "Ajo en Polvo", type: "GRAMOS_POR_KG_TOTAL", val: 4.12, unit: "g" },
-            { itemId: "INV-114", name: "Pimienta Negra Molida", type: "GRAMOS_POR_KG_TOTAL", val: 4.12, unit: "g" },
-            { itemId: "INV-115", name: "Ají en Polvo / Picante", type: "GRAMOS_POR_KG_TOTAL", val: 2.0, unit: "g" },
-            { itemId: "INV-116", name: "Paprika Molida", type: "GRAMOS_POR_KG_TOTAL", val: 7.23, unit: "g" },
-            { itemId: "INV-117", name: "Cebolla en Polvo", type: "GRAMOS_POR_KG_TOTAL", val: 2.06, unit: "g" },
-            { itemId: "INV-118", name: "Azúcar Blanco", type: "GRAMOS_POR_KG_TOTAL", val: 12.0, unit: "g" },
-            { itemId: "INV-119", name: "Orégano Seco", type: "GRAMOS_POR_KG_TOTAL", val: 1.55, unit: "g" },
-            { itemId: "INV-120", name: "Fundas para Embutido", type: "CANTIDAD_FIJA", val: 4, unit: "Unidades" },
-            { itemId: "INV-121", name: "Hilo de Amarrar", type: "CANTIDAD_FIJA", val: 5, unit: "Unidades" }
+            { id: "INV-107", name: "Carne de Pollo", rule: "BASE", factor: 100, grams: 1361, displayRule: "50.50% (Base)", unit: "g" },
+            { id: "INV-108", name: "Grasa de Cerdo / Tocino", rule: "PCT_CARNE", factor: 27.61, grams: 375.77, displayRule: "27.61% de Carne", unit: "g" },
+            { id: "INV-109", name: "Cerveza Barrica del Diablo", rule: "PCT_CARNE_GRASA", factor: 20.25, grams: 351.70, displayRule: "20.25% de (Carne+Grasa)", unit: "g" },
+            { id: "INV-110", name: "Tripolifosfato de Sodio", rule: "G_KG_TOTAL", factor: 0.3, grams: 0.63, displayRule: "0.30 g/Kg Total", unit: "g" },
+            { id: "INV-111", name: "Sal Común", rule: "G_KG_TOTAL", factor: 10.32, grams: 21.55, displayRule: "10.32 g/Kg Total", unit: "g" },
+            { id: "INV-112", name: "Sal de Cura", rule: "G_KG_TOTAL", factor: 0.74, grams: 1.55, displayRule: "0.74 g/Kg Total", unit: "g" },
+            { id: "INV-113", name: "Ajo en Polvo", rule: "G_KG_TOTAL", factor: 4.12, grams: 8.60, displayRule: "4.12 g/Kg Total", unit: "g" },
+            { id: "INV-114", name: "Pimienta Negra Molida", rule: "G_KG_TOTAL", factor: 4.12, grams: 8.60, displayRule: "4.12 g/Kg Total", unit: "g" },
+            { id: "INV-115", name: "Ají en Polvo / Picante", rule: "G_KG_TOTAL", factor: 2.0, grams: 4.18, displayRule: "2.00 g/Kg Total", unit: "g" },
+            { id: "INV-116", name: "Paprika Molida", rule: "G_KG_TOTAL", factor: 7.23, grams: 15.10, displayRule: "7.23 g/Kg Total", unit: "g" },
+            { id: "INV-117", name: "Cebolla en Polvo", rule: "G_KG_TOTAL", factor: 2.06, grams: 4.30, displayRule: "2.06 g/Kg Total", unit: "g" },
+            { id: "INV-118", name: "Azúcar Blanco", rule: "G_KG_TOTAL", factor: 12.0, grams: 25.06, displayRule: "12.00 g/Kg Total", unit: "g" },
+            { id: "INV-119", name: "Orégano Seco", rule: "G_KG_TOTAL", factor: 1.55, grams: 3.24, displayRule: "1.55 g/Kg Total", unit: "g" },
+            { id: "INV-120", name: "Fundas para Embutido", rule: "FIXED", factor: 0, grams: 4, displayRule: "Cantidad Fija Lote", unit: "Unidades" },
+            { id: "INV-121", name: "Hilo de Amarrar", rule: "FIXED", factor: 0, grams: 5, displayRule: "Cantidad Fija Lote", unit: "Unidades" }
+          ]
+        },
+        {
+          id: "FORM-QUESO",
+          productName: "Queso Fresco Pasteurizado UPEC",
+          baseBatchKg: 10.00,
+          plant: "Planta Piloto de Lácteos y Quesos",
+          ingredients: [
+            { id: "INV-122", name: "Leche Cruda Entera de Vaca", rule: "BASE", factor: 100, grams: 10, displayRule: "Base Líquida (10.0 L)", unit: "L" },
+            { id: "INV-123", name: "Cloruro de Calcio Grado Alimenticio", rule: "PCT_VOLUMEN_LECHE", factor: 0.20, grams: 2.0, displayRule: "0.20 g/L Leche", unit: "g" },
+            { id: "INV-124", name: "Cuajo Líquido Fuerza 1:10000", rule: "PCT_VOLUMEN_LECHE", factor: 1.50, grams: 15.0, displayRule: "1.50 ml/L Leche", unit: "ml" },
+            { id: "INV-111", name: "Sal Común", rule: "G_KG_TOTAL", factor: 12.00, grams: 120.0, displayRule: "12.00 g/Kg Queso", unit: "g" }
           ]
         }
       ],
@@ -2025,22 +2048,53 @@
     
     // Lista base de ingredientes con sus coeficientes y reglas del Excel
     let itemsFormulacion = [
-      { id: 'INV-107', name: 'Carne de Pollo', rule: 'BASE', factor: 100, grams: 1361.00, displayRule: '50.50% (Base)' },
-      { id: 'INV-108', name: 'Grasa de Cerdo / Tocino', rule: 'PCT_CARNE', factor: 27.61, grams: 375.77, displayRule: '27.61% de Carne' },
-      { id: 'INV-109', name: 'Cerveza Barrica del Diablo', rule: 'PCT_CARNE_GRASA', factor: 20.25, grams: 351.70, displayRule: '20.25% de (Carne+Grasa)' },
-      { id: 'INV-110', name: 'Tripolifosfato de Sodio', rule: 'G_KG_TOTAL', factor: 0.30, grams: 0.63, displayRule: '0.30 g/Kg Total' },
-      { id: 'INV-111', name: 'Sal Común', rule: 'G_KG_TOTAL', factor: 10.32, grams: 21.55, displayRule: '10.32 g/Kg Total' },
-      { id: 'INV-112', name: 'Sal de Cura', rule: 'G_KG_TOTAL', factor: 0.74, grams: 1.55, displayRule: '0.74 g/Kg Total' },
-      { id: 'INV-113', name: 'Ajo en Polvo', rule: 'G_KG_TOTAL', factor: 4.12, grams: 8.60, displayRule: '4.12 g/Kg Total' },
-      { id: 'INV-114', name: 'Pimienta Negra Molida', rule: 'G_KG_TOTAL', factor: 4.12, grams: 8.60, displayRule: '4.12 g/Kg Total' },
-      { id: 'INV-115', name: 'Ají en Polvo / Picante', rule: 'G_KG_TOTAL', factor: 2.00, grams: 4.18, displayRule: '2.00 g/Kg Total' },
-      { id: 'INV-116', name: 'Paprika Molida', rule: 'G_KG_TOTAL', factor: 7.23, grams: 15.10, displayRule: '7.23 g/Kg Total' },
-      { id: 'INV-117', name: 'Cebolla en Polvo', rule: 'G_KG_TOTAL', factor: 2.06, grams: 4.30, displayRule: '2.06 g/Kg Total' },
-      { id: 'INV-118', name: 'Azúcar Blanco', rule: 'G_KG_TOTAL', factor: 12.00, grams: 25.06, displayRule: '12.00 g/Kg Total' },
-      { id: 'INV-119', name: 'Orégano Seco', rule: 'G_KG_TOTAL', factor: 1.55, grams: 3.24, displayRule: '1.55 g/Kg Total' },
-      { id: 'INV-120', name: 'Salsa Bbq', rule: 'FIXED', factor: 0, grams: 10.80, displayRule: 'Cantidad Fija Lote' },
-      { id: 'INV-121', name: 'Ahumatodo líquido', rule: 'FIXED', factor: 0, grams: 3.27, displayRule: 'Cantidad Fija Lote' }
+      { id: 'INV-107', name: 'Carne de Pollo', rule: 'BASE', factor: 100, grams: 1361.00, displayRule: '50.50% (Base)', unit: 'g' },
+      { id: 'INV-108', name: 'Grasa de Cerdo / Tocino', rule: 'PCT_CARNE', factor: 27.61, grams: 375.77, displayRule: '27.61% de Carne', unit: 'g' },
+      { id: 'INV-109', name: 'Cerveza Barrica del Diablo', rule: 'PCT_CARNE_GRASA', factor: 20.25, grams: 351.70, displayRule: '20.25% de (Carne+Grasa)', unit: 'g' },
+      { id: 'INV-110', name: 'Tripolifosfato de Sodio', rule: 'G_KG_TOTAL', factor: 0.30, grams: 0.63, displayRule: '0.30 g/Kg Total', unit: 'g' },
+      { id: 'INV-111', name: 'Sal Común', rule: 'G_KG_TOTAL', factor: 10.32, grams: 21.55, displayRule: '10.32 g/Kg Total', unit: 'g' },
+      { id: 'INV-112', name: 'Sal de Cura', rule: 'G_KG_TOTAL', factor: 0.74, grams: 1.55, displayRule: '0.74 g/Kg Total', unit: 'g' },
+      { id: 'INV-113', name: 'Ajo en Polvo', rule: 'G_KG_TOTAL', factor: 4.12, grams: 8.60, displayRule: '4.12 g/Kg Total', unit: 'g' },
+      { id: 'INV-114', name: 'Pimienta Negra Molida', rule: 'G_KG_TOTAL', factor: 4.12, grams: 8.60, displayRule: '4.12 g/Kg Total', unit: 'g' },
+      { id: 'INV-115', name: 'Ají en Polvo / Picante', rule: 'G_KG_TOTAL', factor: 2.00, grams: 4.18, displayRule: '2.00 g/Kg Total', unit: 'g' },
+      { id: 'INV-116', name: 'Paprika Molida', rule: 'G_KG_TOTAL', factor: 7.23, grams: 15.10, displayRule: '7.23 g/Kg Total', unit: 'g' },
+      { id: 'INV-117', name: 'Cebolla en Polvo', rule: 'G_KG_TOTAL', factor: 2.06, grams: 4.30, displayRule: '2.06 g/Kg Total', unit: 'g' },
+      { id: 'INV-118', name: 'Azúcar Blanco', rule: 'G_KG_TOTAL', factor: 12.00, grams: 25.06, displayRule: '12.00 g/Kg Total', unit: 'g' },
+      { id: 'INV-119', name: 'Orégano Seco', rule: 'G_KG_TOTAL', factor: 1.55, grams: 3.24, displayRule: '1.55 g/Kg Total', unit: 'g' },
+      { id: 'INV-120', name: 'Fundas para Embutido', rule: 'FIXED', factor: 0, grams: 4, displayRule: 'Cantidad Fija Lote', unit: 'Unidades' },
+      { id: 'INV-121', name: 'Hilo de Amarrar', rule: 'FIXED', factor: 0, grams: 5, displayRule: 'Cantidad Fija Lote', unit: 'Unidades' }
     ];
+
+    let currentSelectedProductId = "FORM-CHORIZO";
+
+    // Carga dinámicamente cualquier receta guardada en el catálogo DB
+    function cargarFormulaProducto(formId) {
+      currentSelectedProductId = formId;
+      const formula = appState.formulas.find(f => f.id === formId);
+      if (!formula) return;
+
+      itemsFormulacion = JSON.parse(JSON.stringify(formula.ingredients));
+
+      const lblBase = document.getElementById('lblBaseIngrediente');
+      const txtCarne = document.getElementById('txtCarneBase');
+      const lblCard1 = document.getElementById('lblCardHeader1');
+      const lblCard2 = document.getElementById('lblCardHeader2');
+
+      if (formId === 'FORM-QUESO') {
+        if (lblBase) lblBase.innerText = "Leche Cruda Base (Litros) *";
+        if (txtCarne) txtCarne.value = "10.00";
+        if (lblCard1) lblCard1.innerText = "VOLUMEN LECHE (L):";
+        if (lblCard2) lblCard2.innerText = "CUAJO LÍQUIDO (ML):";
+      } else {
+        if (lblBase) lblBase.innerText = "Carne de Pollo Base (Gramos) *";
+        if (txtCarne) txtCarne.value = "1361.00";
+        if (lblCard1) lblCard1.innerText = "PESO CARNE Y GRASA:";
+        if (lblCard2) lblCard2.innerText = "PESO CERVEZA HIELO:";
+      }
+
+      recalcularFormulacionReactiva();
+      showToast(`Fórmula cargada: "${formula.productName}"`, 'info');
+    }
 
     // Se ejecuta al cargar la página para sincronizar la primera vista
     function initModuloDespachos() {
@@ -2048,53 +2102,72 @@
       renderColaBodega();
     }
 
-    // El corazón matemático del Excel replicado en JS
+    // El corazón matemático del Excel replicado en JS para cualquier producto
     function recalcularFormulacionReactiva() {
       const txtCarne = document.getElementById('txtCarneBase');
       if (!txtCarne) return;
 
-      let carneBase = parseFloat(txtCarne.value) || 0;
+      let baseValue = parseFloat(txtCarne.value) || 0;
 
-      // 1. Encontrar y fijar los gramos de la carne de pollo
-      const rowCarne = itemsFormulacion.find(i => i.rule === 'BASE');
-      if (rowCarne) rowCarne.grams = carneBase;
+      // 1. Encontrar y fijar los gramos/litros de la materia prima base
+      const rowBase = itemsFormulacion.find(i => i.rule === 'BASE');
+      if (rowBase) rowBase.grams = baseValue;
 
-      // 2. Calcular Grasa (si existe en la lista y no se ha puesto en 0)
-      const rowGrasa = itemsFormulacion.find(i => i.id === 'INV-108');
-      let grasaGramos = 0;
-      if (rowGrasa) {
-        grasaGramos = carneBase * (rowGrasa.factor / 100);
-        rowGrasa.grams = grasaGramos;
-      }
+      let cantidadTotalLote = baseValue;
 
-      // Peso acumulado carne + grasa
-      let pesoCarneGrasa = carneBase + grasaGramos;
-      const lblPesoCarneGrasa = document.getElementById('lblPesoCarneGrasa');
-      if (lblPesoCarneGrasa) lblPesoCarneGrasa.innerText = pesoCarneGrasa.toFixed(2);
-
-      // 3. Calcular Cerveza (20.25% sobre la suma de carne y grasa)
-      const rowCerveza = itemsFormulacion.find(i => i.id === 'INV-109');
-      let cervezaGramos = 0;
-      if (rowCerveza) {
-        cervezaGramos = pesoCarneGrasa * (rowCerveza.factor / 100);
-        rowCerveza.grams = cervezaGramos;
-      }
-      const lblPesoCerveza = document.getElementById('lblPesoCerveza');
-      if (lblPesoCerveza) lblPesoCerveza.innerText = cervezaGramos.toFixed(2);
-
-      // 4. Calcular la Cantidad Total provisional en Kg (Carne + Grasa + Cerveza)
-      let cantidadTotalKg = (pesoCarneGrasa + cervezaGramos) / 1000;
-      const lblCantidadTotalKg = document.getElementById('lblCantidadTotalKg');
-      if (lblCantidadTotalKg) lblCantidadTotalKg.innerText = cantidadTotalKg.toFixed(2);
-
-      // 5. Calcular Aditivos y condimentos basados en g/Kg de esa Cantidad Total
-      itemsFormulacion.forEach(item => {
-        if (item.rule === 'G_KG_TOTAL') {
-          item.grams = item.factor * cantidadTotalKg;
+      if (currentSelectedProductId === 'FORM-CHORIZO') {
+        const rowGrasa = itemsFormulacion.find(i => i.id === 'INV-108');
+        let grasaGramos = 0;
+        if (rowGrasa) {
+          grasaGramos = baseValue * (rowGrasa.factor / 100);
+          rowGrasa.grams = grasaGramos;
         }
-      });
 
-      // 6. Renderizar las filas en la tabla y calcular el Gran Total absoluto
+        let pesoCarneGrasa = baseValue + grasaGramos;
+        const lblPesoCarneGrasa = document.getElementById('lblPesoCarneGrasa');
+        if (lblPesoCarneGrasa) lblPesoCarneGrasa.innerText = pesoCarneGrasa.toFixed(2);
+
+        const rowCerveza = itemsFormulacion.find(i => i.id === 'INV-109');
+        let cervezaGramos = 0;
+        if (rowCerveza) {
+          cervezaGramos = pesoCarneGrasa * (rowCerveza.factor / 100);
+          rowCerveza.grams = cervezaGramos;
+        }
+        const lblPesoCerveza = document.getElementById('lblPesoCerveza');
+        if (lblPesoCerveza) lblPesoCerveza.innerText = cervezaGramos.toFixed(2);
+
+        cantidadTotalLote = (pesoCarneGrasa + cervezaGramos) / 1000;
+        
+        itemsFormulacion.forEach(item => {
+          if (item.rule === 'G_KG_TOTAL') {
+            item.grams = item.factor * cantidadTotalLote;
+          }
+        });
+      } else if (currentSelectedProductId === 'FORM-QUESO') {
+        const lblPesoCarneGrasa = document.getElementById('lblPesoCarneGrasa');
+        if (lblPesoCarneGrasa) lblPesoCarneGrasa.innerText = baseValue.toFixed(2) + " L";
+
+        const rowCuajo = itemsFormulacion.find(i => i.id === 'INV-124');
+        if (rowCuajo) rowCuajo.grams = baseValue * rowCuajo.factor; // 1.5ml por Litro
+        
+        const lblPesoCerveza = document.getElementById('lblPesoCerveza');
+        if (lblPesoCerveza) lblPesoCerveza.innerText = (rowCuajo ? rowCuajo.grams : 0).toFixed(2) + " ml";
+
+        const rowCloruro = itemsFormulacion.find(i => i.id === 'INV-123');
+        if (rowCloruro) rowCloruro.grams = baseValue * rowCloruro.factor; // 0.20g por Litro
+
+        // Rendimiento estimado Queso: ~12% (1.2Kg por cada 10L)
+        cantidadTotalLote = baseValue * 0.12;
+
+        const rowSal = itemsFormulacion.find(i => i.id === 'INV-111');
+        if (rowSal) rowSal.grams = rowSal.factor * cantidadTotalLote;
+      }
+
+      const lblCantidadTotalKg = document.getElementById('lblCantidadTotalKg');
+      if (lblCantidadTotalKg) {
+        lblCantidadTotalKg.innerText = cantidadTotalLote.toFixed(2) + (currentSelectedProductId === 'FORM-QUESO' ? ' Kg (Queso)' : ' Kg (Embutido)');
+      }
+
       renderTablaBOMReactiva();
     }
 
@@ -2256,6 +2329,9 @@
         totalCobrar += item.grams * precioUnit;
       });
 
+      const formulaObj = appState.formulas.find(f => f.id === currentSelectedProductId);
+      const nombreProducto = formulaObj ? formulaObj.productName : 'Chorizo Picante Barrica del Diablo';
+
       if (!appState.solicitudesBOM) appState.solicitudesBOM = [];
       const idSolicitud = "BOM-00" + (appState.solicitudesBOM.length + 1);
 
@@ -2263,7 +2339,7 @@
         id: idSolicitud,
         fecha: typeof SYSTEM_CURRENT_DATE !== 'undefined' ? SYSTEM_CURRENT_DATE : '2026-07-03',
         estudiante: nombre,
-        producto: 'Chorizo Picante Barrica del Diablo',
+        producto: nombreProducto,
         kilos: totalKg,
         totalCobrar: totalCobrar,
         estado: 'PENDIENTE',
